@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Report</title>
+          <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/fontawesome.8f41798f.css')}}">
+            <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/styles.352a605f.css')}}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+    <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+
+
+
+</head>
+<body>
+<form class="form-signin" name="report_form" id="report_form"   method="post" role="form">
+<div class="span gray-head" style="margin-left:0%;height:30px;">
+              <span style="margin-left: 10px;font-size:20px;">
+                    <strong class="binding">{{ report_name }}</strong>
+              </span>
+        </div>
+<div hide="isCollapsed" class="alert-block form-horizontal">
+
+{% for pr in  param %}
+     <br>
+            <div class="form-group info scope" >
+                <label class="control-label col-sm-2 binding" for="officeId">{{ pr['label'] }}</label>
+                    {% if pr['display_type']=='select' %}
+                    <div class="col-sm-3">
+                        <select chosen="reportParam.selectOptions"
+                                id= "{{ pr['parameter_name'] }}"
+                                options="selectOption.id as selectOption.name for selectOption in reportParam.selectOptions"
+                                value="" class="form-control input-xlarge pristine untouched empty invalid invalid-required"
+                                change="getDependencies(reportParam)" required=""  >
+                            <option value="" class="binding" selected="selected">--Select One--</option>
+                            {% for pv in  pr['values'] %}
+                                <option value={{ pv[0] }} class="binding" selected="selected">{{ pv[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                 {% elif pr['display_type']=='date' %}
+                    <input type="date" id="{{ pr['parameter_name'] }}" name="">
+                {% elif pr['display_type']=='text' %}
+                    <input type="text" id="{{ pr['parameter_name'] }}" name="">
+                {% endif %}
+            </div>
+
+{% endfor %}
+<span class="col-md-offset-3 paddedleft120"><a id="run" onclick="runReport()" class="btn btn-primary control binding">
+    &nbsp;&nbsp;Run Report</a></span>
+
+ </div>
+    </form>
+<!--<div>-->
+<!--<table id="dataTable">-->
+
+<!--</table>-->
+<!--</div>-->
+
+<div class="container">
+        <table id="dataTable" data-height="460">
+        <thead>
+         <tr></tr>
+        </thead>
+    </table>
+    </div>
+
+</body>
+<script>
+var plist= {{ plist | safe }};
+var r_id= {{ report_id | safe }};
+var plist_id= {{ plistid | safe }};
+var plist_names= {{ plist | safe }};
+console.log(r_id);
+    function runReport(){
+    //$('#dataTable thead').empty();
+    //$('#dataTable tbody').empty();
+    //$("#dataTable > tbody").html("");
+
+        data_dict={};
+        data_dict['report_id']=r_id;
+        data_dict['plistid']=plist_id;
+        data_dict['plist_names']=plist_names;
+        var i;
+        for (i = 0; i < plist.length; i++) {
+            pname=plist[i];
+            var val = $('#'+pname).val();
+            data_dict[pname]= val;
+            console.log(data_dict);
+            }
+         var post_request = $.ajax({
+            type: 'POST',
+
+            url: '/test_api',
+            data : data_dict
+        });
+        post_request.done(function(data){
+            console.log(data);
+
+            var $table = $('#dataTable');
+            data=JSON.parse(data);
+            //example data:= {"keys": ["id", "name", "startdate"], "data": [{"id": 1, "name": "head", "startdate": "2021-01-06"}]}
+           for (var i = 0; i < data.keys.length; i++) {
+                $('#dataTable thead tr:first-child').append($('<th data-field="'+data.keys[i]+'">'+data.keys[i]+'</th>'));
+                }
+           $('#dataTable').bootstrapTable({
+               data: data.data
+                });
+        });
+    }
+</script>
+
+<script>
+     var row = $("<tr />");
+            $("#dataTable").append(row);
+
+            for (var i = 0; i < data.keys.length; i++) {
+                    row.append("<th>" + data.keys[i]  + "</th>")
+                }
+            var firstRow = $("<tr />");
+            $("#dataTable").append(firstRow);
+            console.log(data.data.length);
+            totalrows=data.data.length;
+            total_columns=data.keys.length;
+             for (var i = 0; i < totalrows; i++) {
+                       var row_str='';
+                        for (var j = 0; j < total_columns; j++){
+                              var colname=data.keys[j];
+                              row_str=row_str+ "<td>"+ data.data[i][colname]+"</td>";
+                        }
+                        firstRow.append(row_str);
+
+                }
+</script>
+
+
+
+</html>

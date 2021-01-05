@@ -30,6 +30,7 @@ class FlaskParameter(db.Model):
     parameter_display_type = db.Column(db.String(50), nullable=False)
     parameter_format_type = db.Column(db.String(50), nullable=False)
     parameter_default = db.Column(db.String(45), nullable=True)
+    parent_id = db.Column(db.Integer,nullable=True)
     reportparams = db.relationship('FlaskReportParameter')
 
 class FlaskReportParameter(db.Model):

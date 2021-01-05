@@ -60,8 +60,8 @@
 <!--</table>-->
 <!--</div>-->
 
-<div class="container">
-        <table id="dataTable" data-height="460">
+<div class="container-fluid">
+        <table id="dataTable" >
         <thead>
          <tr></tr>
         </thead>
@@ -70,6 +70,19 @@
 
 </body>
 <script>
+{[parent_label:"office",
+parent_id:1,
+child:[{'child_label:"officer",
+"child_id":3},]
+,
+parent_label:"officer",
+parent_id:2,
+child:[]
+],
+
+
+
+
 var plist= {{ plist | safe }};
 var r_id= {{ report_id | safe }};
 var plist_id= {{ plistid | safe }};
@@ -99,11 +112,10 @@ console.log(r_id);
         });
         post_request.done(function(data){
             console.log(data);
-
             var $table = $('#dataTable');
             data=JSON.parse(data);
             //example data:= {"keys": ["id", "name", "startdate"], "data": [{"id": 1, "name": "head", "startdate": "2021-01-06"}]}
-           for (var i = 0; i < data.keys.length; i++) {
+            for (var i = 0; i < data.keys.length; i++) {
                 $('#dataTable thead tr:first-child').append($('<th data-field="'+data.keys[i]+'">'+data.keys[i]+'</th>'));
                 }
            $('#dataTable').bootstrapTable({

@@ -2,6 +2,9 @@ from app import app,db
 from models import FlaskReport,FlaskReportParameter,FlaskParameter
 from flask import render_template,request,url_for,redirect,make_response
 import json
+from sqlalchemy.sql import expression, functions
+from sqlalchemy import types
+
 def queryset_to_dict(query_result):
     query_columns = query_result[0].keys()
     res = [list(ele) for ele in query_result]
@@ -37,7 +40,9 @@ def flask_make_report():
             report.params.append(param)
         db.session.add(report)
         db.session.commit()
-    params=db.session.query(FlaskParameter.id,FlaskParameter.parameter_label)
+    params=db.session.query(FlaskParameter.id,FlaskParameter.parameter_label,
+                            FlaskParameter.parameter_name,functions.concat('${',expression.cast(FlaskParameter.parameter_name
+                                                                                           ,types.Unicode),'}').label('parameter_full_name'))
     return render_template("add_report.html",params=params)
 
 @app.route('/list_reports',methods=['GET','POST'])
@@ -56,11 +61,10 @@ def flask_report_details(id):
                                     FlaskParameter.parameter_label,
                                     FlaskParameter.parameter_name,
                                     FlaskParameter.parameter_sql,
-                                    FlaskParameter.id
+                                    FlaskParameter.id,
+                                    FlaskParameter.parent_id
                                     ).join(FlaskReportParameter,(FlaskReportParameter.parameter_id==FlaskParameter.id)).filter(
                                     FlaskReportParameter.report_id == id)
-    print(report_param)
-    i=0
     listdict=[]
     paramereter_list=[]
     paramereter_list_id=[]
@@ -71,17 +75,13 @@ def flask_report_details(id):
         dictv['label']=rp.parameter_label
         dictv['display_type']=rp.parameter_display_type
         dictv['parameter_name']=rp.parameter_name
-        if rp.parameter_display_type=='select':
+        if rp.parameter_display_type=='select' and rp.parent_id is None:
             param_query=db.session.execute(rp.parameter_sql)
             param_result = param_query.fetchall()
-            print('rp.parameter_sql',rp.parameter_sql,param_result)
             dictv['values']=param_result
         else:
             dictv['values'] =[]
-        print(dictv)
         listdict.append(dictv)
-
-    print(paramereter_list)
     return render_template('run_report.html',param=listdict,report_name=reportdetails.name,plist=paramereter_list,report_id=id,plistid=paramereter_list_id)
 
 

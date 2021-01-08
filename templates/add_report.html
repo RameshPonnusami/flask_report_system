@@ -105,7 +105,7 @@
                     <tbody>
                     <tr class="graybg">
                         <th id="parame" name="parame" class="binding">Parameter</th>
-                        <th id="value" name="value" class="binding">Value</th>
+                        <th id="value" style="display:none;"  name="value" class="binding">Value</th>
                         <th id="dd" name="dd" class="binding">Actions</th>
                     </tr>
                     </tbody>
@@ -149,7 +149,7 @@ var myDropdown=document.getElementsByName('parametervalue');
         var selectedlebel=$('#parametervalue option:selected').text();
         console.log($('#parametervalue option:selected').text());
         console.log(paramlist);
-        var  tablerow='<td> <input id="selectedparam" name="selectedparam['+paramlist+']" type="text" value="'+selectedval +'"readonly></td>'
+        var  tablerow='<td style="display:none;" > <input id="selectedparam" name="selectedparam['+paramlist+']" type="text" value="'+selectedval +'"readonly></td>'
         console.log(tablerow);
         var deletestr='<td><input type="button" id="delete" value="Delete" onclick="deleteRow(this)"/></td>';
         console.log(deletestr);

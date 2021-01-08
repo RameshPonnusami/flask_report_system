@@ -102,7 +102,7 @@
                     <tbody>
                     <tr class="graybg">
                         <th id="parame" name="parame" class="binding">Parameter</th>
-                        <th id="value" name="value" class="binding">Value</th>
+                        <th style="display:none;" id="value" name="value" class="binding">Value</th>
                         <th id="dd" name="dd" class="binding">Actions</th>
                     </tr>
                     </tbody>
@@ -141,7 +141,7 @@ var added_param={{added_param |  safe }};
 console.log(added_param);
 for ( var i = 0, l = added_param.length; i < l; i++ ) {
     console.log(added_param[i]);
-     var  tablerow='<td> <input id="selectedparam" name="selectedparam[]" type="text" value="'+added_param[i]['id'] +'"readonly></td>'
+     var  tablerow='<td style="display:none;" > <input id="selectedparam" name="selectedparam[]" type="text" value="'+added_param[i]['id'] +'"readonly></td>'
         console.log(tablerow);
         var deletestr='<td><input type="button" id="delete" value="Delete" onclick="deleteRow(this)"/></td>';
         console.log(deletestr);

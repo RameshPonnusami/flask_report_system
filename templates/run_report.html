@@ -1,98 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Report</title>
-          <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/fontawesome.8f41798f.css')}}">
-            <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/styles.352a605f.css')}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
-    <script src="https://unpkg.com/bootstrap-table@1.14.2/dist/bootstrap-table.min.js"></script>
+{% extends 'index.html' %}
+{% block title %}List Of Reports{% endblock %}
+{% block content %}
+<style>
+     div.dataTables_wrapper {
+        width: auto;
+        border:  #f1f1f1;
+    }
+     .card{
+    display: block;    background: #fff;
+    }
 
+</style>
 
-
-</head>
-<body>
-<form class="form-signin" name="report_form" id="report_form"   method="post" role="form">
-<div class="span gray-head" style="margin-left:0%;height:30px;">
+<div class="container">
+    <ul class="breadcrumb">
+        <li><a href="{{  url_for('list_reports') }}" class="ng-binding">Reports</a></li>
+        <li class="active ng-binding">Run Report</li>
+    </ul>
+    <div class="card well">
+        <form class="form-signin" name="report_form" id="report_form" method="post" role="form">
+            <div class="span gray-head" style="margin-left:0%;height:30px;">
               <span style="margin-left: 10px;font-size:20px;">
                     <strong class="binding">{{ report_name }}</strong>
               </span>
-        </div>
-<div hide="isCollapsed" class="alert-block form-horizontal">
-
-{% for pr in  param %}
-     <br>
-            <div class="form-group info scope" >
-                <label class="control-label col-sm-2 binding" for="officeId">{{ pr['label'] }}</label>
+            </div>
+            <div hide="isCollapsed" class="alert-block form-horizontal">
+                {% for pr in param %}
+                <div class="form-group info scope">
+                    <label class="control-label col-sm-2 binding" for="officeId">{{ pr['label'] }}</label>
                     {% if pr['display_type']=='select' %}
                     <div class="col-sm-3">
                         <select chosen="reportParam.selectOptions"
-                                id= "{{ pr['parameter_name'] }}"
+                                id="{{ pr['parameter_name'] }}"
                                 options="selectOption.id as selectOption.name for selectOption in reportParam.selectOptions"
-                                value="" class="form-control input-xlarge pristine untouched empty invalid invalid-required"
-                                change="getDependencies(reportParam)" required=""  >
-                            <option value="" class="binding" selected="selected">--Select One--</option>
-                            {% for pv in  pr['values'] %}
-                                <option value={{ pv[0] }} class="binding" selected="selected">{{ pv[1] }}</option>
+                                value=""
+                                class="form-control input-xlarge pristine untouched empty invalid invalid-required"
+                                onchange="dropdownCheck(this)" required="">
+                            <option value="" class="binding" selected>--Select One--</option>
+                            {% for pv in pr['values'] %}
+                            <option value={{ pv[0] }} class="binding">{{ pv[1] }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                 {% elif pr['display_type']=='date' %}
-                    <input type="date" id="{{ pr['parameter_name'] }}" name="">
-                {% elif pr['display_type']=='text' %}
-                    <input type="text" id="{{ pr['parameter_name'] }}" name="">
-                {% endif %}
+                    {% elif pr['display_type']=='date' %}
+                    <div class="col-sm-3">
+                        <input type="date" id="{{ pr['parameter_name'] }}" name="">
+                    </div>
+                    {% elif pr['display_type']=='text' %}
+                    <div class="col-sm-3">
+                        <input type="text" id="{{ pr['parameter_name'] }}" name="">
+                    </div>
+                    {% elif pr['display_type']=='number' %}
+                    <div class="col-sm-3">
+                        <input type="number" id="{{ pr['parameter_name'] }}" class="form-control"/>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <span class="col-md-offset-1 paddedleft120"><a id="run" onclick="runReport()" class="btn btn-primary control binding">&nbsp;&nbsp;Run Report</a></span>
             </div>
-
-{% endfor %}
-<span class="col-md-offset-3 paddedleft120"><a id="run" onclick="runReport()" class="btn btn-primary control binding">
-    &nbsp;&nbsp;Run Report</a></span>
-
- </div>
-    </form>
-<!--<div>-->
-<!--<table id="dataTable">-->
-
-<!--</table>-->
-<!--</div>-->
-
-<div class="container-fluid">
-        <table id="dataTable" >
-        <thead>
-         <tr></tr>
-        </thead>
-    </table>
+        </form>
+        <br>
+        <div class="container-fluid">
+            <div class="panel panel-default">
+                <div class="panel-body" style="background:#f1f1f1">
+                    <table id="dataTable" class="display nowrap" style="width:100%;">
+                        <thead>
+                        <tr></tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-
-</body>
+</div>
 <script>
-{[parent_label:"office",
-parent_id:1,
-child:[{'child_label:"officer",
-"child_id":3},]
-,
-parent_label:"officer",
-parent_id:2,
-child:[]
-],
-
-
-
-
 var plist= {{ plist | safe }};
 var r_id= {{ report_id | safe }};
 var plist_id= {{ plistid | safe }};
 var plist_names= {{ plist | safe }};
+var parent_data= {{ parent_data | safe }};
+var report_name='{{ report_name }}';
 console.log(r_id);
-    function runReport(){
-    //$('#dataTable thead').empty();
-    //$('#dataTable tbody').empty();
-    //$("#dataTable > tbody").html("");
 
+    function dropdownCheck(element){
+        var element_id=element.id;
+        var element_selected_val = $('#'+element_id).val();
+        console.log(element_id);
+        dataItems = parent_data.map((parentitem) => {
+            console.log(parentitem);
+            var parent_element_data=parentitem;
+            if (parentitem.parent_param_label == element_id)
+                 {
+                    parent_element_data.children.map((childitem) => {
+                        console.log(childitem.child_param_label);
+                        var child_param_id=childitem.child_param_id;
+                        var child_param_label=childitem.child_param_label;
+                        // ajax call start
+                        data_dict={"parent_value":element_selected_val,"parent_label":element_id,
+                        "child_param_id":child_param_id,"child_param_label":child_param_label};
+                         var post_request = $.ajax({
+                                                type: 'POST',
+                                                url: '/child_dropdown',
+                                                data : data_dict
+                                            });
+                         post_request.done(function(data){
+                            console.log(data);
+                            child_data=JSON.parse(data);
+                            var child_dropdown_id=child_data.child_dropdown_id;
+                            var child_dropdown_id ='#'+child_dropdown_id;
+                            $(child_dropdown_id).empty();
+                            $(child_dropdown_id).append("<option value=''>--Please Select--</option>");
+                            child_data.data.map((child_elem) => {
+                                 $(child_dropdown_id).append("<option value='"+child_elem.value+"'>"+child_elem.label+"</option>");
+                                });
+                          });
+                        //ajax call end
+                    });
+                 }
+        });
+    }
+
+    function runReport(){
         data_dict={};
         data_dict['report_id']=r_id;
         data_dict['plistid']=plist_id;
@@ -106,48 +135,62 @@ console.log(r_id);
             }
          var post_request = $.ajax({
             type: 'POST',
-
-            url: '/test_api',
+            url: '/run_report',
             data : data_dict
         });
         post_request.done(function(data){
             console.log(data);
             var $table = $('#dataTable');
             data=JSON.parse(data);
-            //example data:= {"keys": ["id", "name", "startdate"], "data": [{"id": 1, "name": "head", "startdate": "2021-01-06"}]}
             for (var i = 0; i < data.keys.length; i++) {
                 $('#dataTable thead tr:first-child').append($('<th data-field="'+data.keys[i]+'">'+data.keys[i]+'</th>'));
                 }
-           $('#dataTable').bootstrapTable({
-               data: data.data
+            var cols = [];
+            var exampleRecord = data.data[0];
+            //get keys in object. This will only work if your statement remains true that all objects have identical keys
+            var keys = Object.keys(exampleRecord);
+            //for each key, add a column definition
+            keys.forEach(function(k) {
+                cols.push({
+                    title: k,
+                    data: k
+                    //optionally do some type detection here for render function
                 });
+              });
+            var currentDate = new Date()
+            var day = currentDate.getDate()
+            var month = currentDate.getMonth() + 1
+            var year = currentDate.getFullYear()
+            var d = day + "-" + month + "-" + year;
+            //initialize DataTables
+            var table = $('#dataTable').DataTable({
+                columns: cols,
+                dom: 'Bfrtip',
+                buttons: [
+                     {
+                        extend: 'excelHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    'copy', 'print' ],
+
+             });
+          //add data and draw
+          table.rows.add(data.data).draw();
         });
     }
 </script>
 
-<script>
-     var row = $("<tr />");
-            $("#dataTable").append(row);
-
-            for (var i = 0; i < data.keys.length; i++) {
-                    row.append("<th>" + data.keys[i]  + "</th>")
-                }
-            var firstRow = $("<tr />");
-            $("#dataTable").append(firstRow);
-            console.log(data.data.length);
-            totalrows=data.data.length;
-            total_columns=data.keys.length;
-             for (var i = 0; i < totalrows; i++) {
-                       var row_str='';
-                        for (var j = 0; j < total_columns; j++){
-                              var colname=data.keys[j];
-                              row_str=row_str+ "<td>"+ data.data[i][colname]+"</td>";
-                        }
-                        firstRow.append(row_str);
-
-                }
-</script>
 
 
-
-</html>
+{% endblock %}

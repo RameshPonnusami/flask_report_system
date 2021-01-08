@@ -14,19 +14,18 @@
     div.dataTables_wrapper {
         width: auto;
     }
-    table#selectedparamtable td + td+td ~ td {
-   display: none;
-}
 
+ #delete { float:right }
 </style>
-
-
 
 <div class="container">
       <ul class="breadcrumb">
         <li><a href="{{  url_for('edit_report_list') }}" class="ng-binding">Mange Reports</a></li>
-        <li class="active ng-binding">Add Report</li>
-    </ul>
+        <li class="active ng-binding">Edit Report</li>
+                   <span id="delete" ><a href="{{ url_for( 'delete_report' , id=report['id']) }}" class="btn btn-primary"><i class="fa fa-trash "></i> Delete</a></span>
+
+      </ul>
+<br>
 <div class="card well">
 
     <div class="row">
@@ -35,7 +34,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="reportname">Report Name</label>
-                        <input id="reportname" name="reportname" type="text" class="form-control">
+                        <input id="reportname" name="reportname" type="text" class="form-control" value="{{report['name']}}">
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">
@@ -43,7 +42,6 @@
                                     class="required">*</span></label>
                             <select id="reportType" name="reportType" class="form-control" value="">
                                 <option label="Table" value="Table" selected="selected">Table</option>
-                                <option label="Chart" value="Chart">Chart</option>
                             </select>
                         </div>
                         <div class="form-group col-md-6">
@@ -61,13 +59,13 @@
                         <div class="form-group col-md-6">
                             <label class="control-label binding">Description</label>
                             <div>
-                                <textarea id="description" name="description" class="form-control" rows="3"></textarea>
+                                <textarea id="description" name="description" class="form-control" rows="3" value="{{report['description']}}"></textarea>
                             </div>
                         </div>
                         <div class="form-group col-md-6">
                             <label class="control-label binding">Report category&nbsp;</label>
                             <div>
-                                <input id="reportCategory" name="reportCategory" type="text" class="form-control">
+                                <input id="reportCategory" name="reportCategory" type="text" class="form-control" value="{{report['report_category']}}">
                             </div>
                         </div>
                     </div>
@@ -76,12 +74,11 @@
                         <div class="form-group col-md-12">
                             <label class="control-label binding">Sql<span class="required">*</span></label>
                             <textarea class="form-control width100 " id="reportSql" rows="4" name="sql"
-                                      model="formData.reportSql" required=""></textarea>
-                            <form-validate valattributeform="createreportrform" valattribute="sql"><span show=""
+                                      model="formData.reportSql" required="">{{report["sql"]}}</textarea>
+                            <form-validate valattributeform="createreportrform" valattribute="sql" > <span show=""
                                                                                                          class="scope"><small
-                                    class="error binding hide"
-                                    show="createreportrform.sql.$error.req || rc.createreportrform.attempted || createreportrform.$submitted ">Required Field</small><small
-                                    class="required error binding hide" show="createreportrform.sql.$error.nval">Must be numeric</small></span>
+                                    class="error binding hide">Required Field</small><small
+                                    class="required error binding hide" >Must be numeric</small></span>
                             </form-validate>
                         </div>
                     </div>
@@ -97,7 +94,7 @@
                             {% endfor %}
                         </select>
                         <span>
-                           <input type="button" class="btn btn-primary binding" onclick="parameterSelected()" value="Add">
+                           <input type="button" class="btn btn-primary binding" onclick="EditparameterSelected()" value="Add">
                          </span>
                     </div>
                 </div>
@@ -109,6 +106,7 @@
                         <th id="dd" name="dd" class="binding">Actions</th>
                     </tr>
                     </tbody>
+
                 </table>
                 <br>
                 <input type="submit" class="btn btn-primary binding" style="margin:auto;display:block" value="Submit">
@@ -138,12 +136,31 @@
     </div>
 </div>
 </div>
+<script>
+var added_param={{added_param |  safe }};
+console.log(added_param);
+for ( var i = 0, l = added_param.length; i < l; i++ ) {
+    console.log(added_param[i]);
+     var  tablerow='<td> <input id="selectedparam" name="selectedparam[]" type="text" value="'+added_param[i]['id'] +'"readonly></td>'
+        console.log(tablerow);
+        var deletestr='<td><input type="button" id="delete" value="Delete" onclick="deleteRow(this)"/></td>';
+        console.log(deletestr);
+        $(selectedparamtable).find('tbody').append("<tr><td id='selectedparamlabel' name='selectedparamlabel'>"+added_param[i]['parameter_label']+"</td>"+tablerow+deletestr+"</tr>");
+
+}
+
+    $(document).ready(function() {
+    $('#list_reports').DataTable();
+} );
+</script>
 
 <script>
-$(selectedparamtable).hide();
+
 var paramlist='';
+
+
 var myDropdown=document.getElementsByName('parametervalue');
-    function parameterSelected(){
+    function EditparameterSelected(){
         console.log('option changed : '+myDropdown[0].value);
         var selectedval=myDropdown[0].value;
         var selectedlebel=$('#parametervalue option:selected').text();

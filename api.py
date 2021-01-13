@@ -4,6 +4,19 @@ from flask import render_template,request,url_for,redirect,make_response
 import json
 from sqlalchemy.sql import expression, functions
 from sqlalchemy import types
+from datetime import datetime, date
+
+def default(o):
+    if isinstance(o, (date, datetime)):
+        return o.isoformat()
+
+def get_model_columns(instance, exclude=[]):
+    columns = instance.__table__.columns.keys()
+    columns = list(set(columns) - set(exclude))
+    return columns
+
+def convert_object_into_dict( data, cols):
+    return [{col: getattr(d, col) for col in cols} for d in data]
 
 def queryset_to_dict(query_result):
     try:
@@ -196,7 +209,7 @@ def run_report():
         result_query = result_query.fetchall()
         queryset=queryset_to_dict(result_query)
         dataset={"keys":columns_names,"data":queryset}
-        return make_response(json.dumps(dataset))
+        return make_response(json.dumps(dataset,default=default))
 
 
 @app.route('/child_dropdown',methods=['GET','POST'])
@@ -241,3 +254,87 @@ def delete_report(id):
     except Exception as e:
         print(e,'Error while deleting FlaskReport')
     return redirect(url_for('edit_report_list'))
+
+@app.route('/param_data',methods=['GET','POST'])
+def param_data():
+    if request.method=='POST':
+        print('post')
+    if request.method == 'GET':
+        print('GET')
+        fp=FlaskParameter.query.all()
+        cols=get_model_columns(FlaskParameter)
+        fp=convert_object_into_dict(fp, cols)
+        return render_template('edit_param_list.html',fp=fp)
+
+@app.route('/param_details/<int:id>',methods=['GET','POST'])
+def param_details(id):
+    if request.method == 'GET':
+        fp = FlaskParameter.query.filter(FlaskParameter.id==id).first()
+        parent_id=fp.parent_id
+        fp={"parameter_name":fp.parameter_name,"parameter_label":fp.parameter_label,"parameter_sql":fp.parameter_sql,
+             "description":fp.description,"parameter_display_type":fp.parameter_display_type,
+             "parameter_format_type":fp.parameter_format_type,"parameter_default":fp.parameter_default,
+             "parent_id":fp.parent_id,"id":fp.id}
+        params = db.session.query(FlaskParameter.id, FlaskParameter.parameter_label,
+                                  FlaskParameter.parameter_name,
+                                  functions.concat('${', expression.cast(FlaskParameter.parameter_name
+                                                                         , types.Unicode), '}').label(
+                                      'parameter_full_name'))
+        added_param = db.session.query(FlaskParameter.parameter_label,
+                                        FlaskParameter.parameter_name,
+                                        FlaskParameter.id).filter(FlaskParameter.id==parent_id).all()
+        added_params=queryset_to_dict(added_param)
+        return render_template('edit_param.html',param=fp,params=params,added_params=added_params)
+
+    if request.method == 'POST':
+        print(request.form)
+        paramlabel=request.form.get('paramlabel')
+        parameter_name=request.form.get('parameter_name')
+        paramdisplay_type=request.form.get('paramdisplay_type')
+        paramformat_type=request.form.get('paramformat_type')
+        description=request.form.get('description')
+        parameter_sql=request.form.get('parameter_sql')
+        parametervalue=request.form.get('parametervalue')
+        parent_id=request.form.get('selectedparam[]')
+        instance = FlaskParameter.query.filter(FlaskParameter.id == id)
+        fp = {"parameter_name": parameter_name, "parameter_label": paramlabel,
+              "parameter_sql": parameter_sql,
+              "description": description, "parameter_display_type": paramdisplay_type,
+              "parameter_format_type": paramformat_type,
+              "parent_id": parent_id}
+        param = instance.update(fp)
+        db.session.commit()
+        return redirect(url_for('param_data'))
+
+
+@app.route('/add_parameter',methods=['GET','POST'])
+def add_parameter():
+    if request.method == 'POST':
+        paramlabel = request.form.get('paramlabel')
+        parameter_name = request.form.get('parameter_name')
+        paramdisplay_type = request.form.get('paramdisplay_type')
+        paramformat_type = request.form.get('paramformat_type')
+        description = request.form.get('description')
+        parameter_sql = request.form.get('parameter_sql')
+        parametervalue = request.form.get('parametervalue')
+        parent_id = request.form.get('selectedparam[]')
+        param = FlaskParameter(parameter_name= parameter_name, parameter_label= paramlabel,
+        parameter_sql= parameter_sql,
+        description= description, parameter_display_type= paramdisplay_type,
+        parameter_format_type= paramformat_type,
+        parent_id= parent_id)
+        db.session.add(param)
+        db.session.commit()
+        return redirect(url_for('param_data'))
+    if request.method == 'GET':
+        params = db.session.query(FlaskParameter.id, FlaskParameter.parameter_label,
+                                  FlaskParameter.parameter_name,
+                                  functions.concat('${', expression.cast(FlaskParameter.parameter_name
+                                                                         , types.Unicode), '}').label(
+                                      'parameter_full_name'))
+        return render_template('add_param.html',params=params)
+
+
+@app.route('/delete_param/<int:id>',methods=['GET','POST'])
+def delete_param(id):
+    print('delete')

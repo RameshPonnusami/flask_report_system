@@ -5,10 +5,24 @@
      div.dataTables_wrapper {
         width: auto;
         border:  #f1f1f1;
+        overflow:auto;
     }
      .card{
     display: block;    background: #fff;
     }
+    th {
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+  border-right: 1px solid white;
+    }
+
+    th:first-child {
+      border-left: 1px solid white;
+    }
+
+    #table_container{width:1000px;overflow:auto;}
+
+
 
 </style>
 
@@ -63,9 +77,9 @@
         <br>
         <div class="container-fluid">
             <div class="panel panel-default">
-                <div class="panel-body" style="background:#f1f1f1">
-                    <table id="dataTable" class="display nowrap" style="width:100%;">
-                        <thead>
+                <div id="table_container" class="panel-body" style="background:#f1f1f1">
+                    <table id="dataTable" class="cell-border" style="width:100%">
+                        <thead class="cell-border" style="width:100%;background-color: #27507F;color: white;">
                         <tr></tr>
                         </thead>
                     </table>
@@ -140,7 +154,9 @@ console.log(r_id);
         });
         post_request.done(function(data){
             console.log(data);
-            var $table = $('#dataTable');
+            //var $table = $('#dataTable');
+
+
             data=JSON.parse(data);
             for (var i = 0; i < data.keys.length; i++) {
                 $('#dataTable thead tr:first-child').append($('<th data-field="'+data.keys[i]+'">'+data.keys[i]+'</th>'));
@@ -188,7 +204,12 @@ console.log(r_id);
           //add data and draw
           table.rows.add(data.data).draw();
         });
-    }
+
+
+
+                    }
+
+
 </script>
 
 

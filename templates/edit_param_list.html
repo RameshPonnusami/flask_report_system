@@ -1,0 +1,69 @@
+{% extends 'index.html' %}
+{% block title %}Manage Reports{% endblock %}
+{% block content %}
+<h3>List Of Reports</h3>
+
+<style>
+    .card{
+    display: block;    background: #fff;
+    }
+  #editlist #cratenew { float:right }
+
+</style>
+<script>
+    $(document).ready(function() {
+    $('#list_reports').DataTable();
+} );
+</script>
+
+<div  class="container-fluid">
+<div id="editlist" class="card well" >
+     <span id="cratenew" class="col-md-offset-1 paddedleft120"><a href="{{ url_for('create_flask_report' ) }}" class="btn btn-primary control binding"><i class="fa fa-plus"></i>&nbsp;Create New</a></span>
+        <br>
+        <br>
+        <input   type="text"  name="list_search" id="list_search" onkeyup='searchTable()'  class="span marginbottom0px form-control  pristine untouched  valid empty" placeholder="Filter by name">
+        <table class="table"  name="list_reports" id="list_reports"  class="table table-striped">
+            <thead>
+            <tr class="graybg">
+                <th class="binding">Name</th>
+                <th class="binding">Type</th>
+                <th class="binding">Category</th>
+            </tr>
+            </thead>
+            <tbody >
+            {% for p in params %}
+            <tr class="pointer-main scope" repeat="report in reports| orderBy:'report_name':reverse | filter:filterText |filter:filterByReportSubType | itemsPerPage: ReportsPerPage">
+                <td class="pointer binding" value={{ p.id }} onclick="window.location.href='{{ url_for( 'flask_edit_report_details' , id=p.id ) }}';">{{ p.name }}</td>
+                <td class="pointer binding" value={{ p.id }} onclick="window.location.href='{{ url_for( 'flask_edit_report_details' , id=p.id ) }}';">{{ p.report_type }}</td>
+                <td class="pointer binding" value={{ p.id }} onclick="window.location.href='{{ url_for( 'flask_edit_report_details' , id=p.id ) }}';">{{ p.report_category }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table></div>
+
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+  function searchTable() {
+    var input, filter, table, tr, td, i;
+  input = document.getElementById("list_search");
+  filter = input.value.toUpperCase();
+  table = document.getElementById("list_reports");
+  tr = table.getElementsByTagName("tr");
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+</script>
+</script>
+
+{% endblock %}

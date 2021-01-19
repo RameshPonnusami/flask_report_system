@@ -9,7 +9,6 @@ load_dotenv(os.path.join(basedir, '.env'))
 db_name = 'database.db'
 db_path = os.path.join(os.path.dirname(__file__), db_name)
 db_uri = 'postgresql://postgres:DvaraDev@1234#@localhost:5432/flask_report'
-#db_uri = 'postgresql://medshakti:MedShakti#123@13.232.236.136:5432/medshakti'
 print(db_uri)
 
 class Config:

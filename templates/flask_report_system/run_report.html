@@ -1,0 +1,229 @@
+{% extends 'flask_report_system/index.html' %}
+{% block title %}List Of Reports{% endblock %}
+{% block content %}
+<style>
+     div.dataTables_wrapper {
+        width: auto;
+        border:  #f1f1f1;
+        overflow:auto;
+    }
+     .card{
+    display: block;    background: #fff;
+    }
+    #table_container{overflow:auto;}
+
+
+#dataTable td, #dataTable th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#dataTable tr:nth-child(even){background-color: #f2f2f2;}
+
+#dataTable tr:hover {background-color: #ddd;}
+
+#dataTable th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+
+
+</style>
+
+<div class="container">
+    <ul class="breadcrumb">
+        <li><a href="{{  url_for('list_reports') }}" class="ng-binding">Reports</a></li>
+        <li class="active ng-binding">Run Report</li>
+    </ul>
+    <div class="card well">
+        <form class="form-signin" name="report_form" id="report_form" method="post" role="form">
+            <div class="span gray-head" style="margin-left:0%;height:30px;">
+              <span style="margin-left: 10px;font-size:20px;">
+                    <strong class="binding">{{ report_name }}</strong>
+              </span>
+            </div>
+            <div hide="isCollapsed" class="alert-block form-horizontal">
+                {% for pr in param %}
+                <div class="form-group info scope">
+                    <label class="control-label col-sm-2 binding" for="officeId">{{ pr['label'] }}</label>
+                    {% if pr['display_type']=='select' %}
+                    <div class="col-sm-3">
+                        <select chosen="reportParam.selectOptions"
+                                id="{{ pr['parameter_name'] }}"
+                                options="selectOption.id as selectOption.name for selectOption in reportParam.selectOptions"
+                                value=""
+                                class="form-control input-xlarge pristine untouched empty invalid invalid-required"
+                                onchange="dropdownCheck(this)" required="">
+                            <option value="" class="binding" selected>--Select One--</option>
+                            {% for pv in pr['values'] %}
+                            <option value={{ pv[0] }} class="binding">{{ pv[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% elif pr['display_type']=='date' %}
+                    <div class="col-sm-3">
+                        <input type="date" id="{{ pr['parameter_name'] }}" name="">
+                    </div>
+                    {% elif pr['display_type']=='text' %}
+                    <div class="col-sm-3">
+                        <input type="text" id="{{ pr['parameter_name'] }}" name="">
+                    </div>
+                    {% elif pr['display_type']=='number' %}
+                    <div class="col-sm-3">
+                        <input type="number" id="{{ pr['parameter_name'] }}" class="form-control"/>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <span class="col-md-offset-1 paddedleft120"><a id="run" onclick="runReport()" class="btn btn-primary control binding">&nbsp;&nbsp;Run Report</a></span>
+            </div>
+        </form>
+        <br>
+        <div class="container-fluid">
+            <div class="panel panel-default">
+                <div id="table_container" class="panel-body" style="background:#f1f1f1">
+                    <table id="dataTable" class="cell-border" style="width:100%">
+                        <thead id="datatable_thead" class="cell-border" style="width:100%;background-color: #27507F;color: white;">
+                        </thead>
+                        <tbody id="datatable_body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+var plist= {{ plist | safe }};
+var r_id= {{ report_id | safe }};
+var plist_id= {{ plistid | safe }};
+var plist_names= {{ plist | safe }};
+var parent_data= {{ parent_data | safe }};
+var report_name='{{ report_name }}';
+console.log(r_id);
+    function dropdownCheck(element){
+        var element_id=element.id;
+        var element_selected_val = $('#'+element_id).val();
+        console.log(element_id);
+        dataItems = parent_data.map((parentitem) => {
+            console.log(parentitem);
+            var parent_element_data=parentitem;
+            if (parentitem.parent_param_label == element_id)
+                 {
+                    parent_element_data.children.map((childitem) => {
+                        console.log(childitem.child_param_label);
+                        var child_param_id=childitem.child_param_id;
+                        var child_param_label=childitem.child_param_label;
+                        // ajax call start
+                        data_dict={"parent_value":element_selected_val,"parent_label":element_id,
+                        "child_param_id":child_param_id,"child_param_label":child_param_label};
+                         var post_request = $.ajax({
+                                                type: 'POST',
+                                                url: '/child_dropdown',
+                                                data : data_dict
+                                            });
+                         post_request.done(function(data){
+                            console.log(data);
+                            child_data=JSON.parse(data);
+                            var child_dropdown_id=child_data.child_dropdown_id;
+                            var child_dropdown_id ='#'+child_dropdown_id;
+                            $(child_dropdown_id).empty();
+                            $(child_dropdown_id).append("<option value=''>--Please Select--</option>");
+                            child_data.data.map((child_elem) => {
+                                 $(child_dropdown_id).append("<option value='"+child_elem.value+"'>"+child_elem.label+"</option>");
+                                });
+                          });
+                        //ajax call end
+                    });
+                 }
+        });
+    }
+
+    function runReport(){
+        data_dict={};
+        data_dict['report_id']=r_id;
+        data_dict['plistid']=plist_id;
+        data_dict['plist_names']=plist_names;
+        var i;
+        for (i = 0; i < plist.length; i++) {
+            pname=plist[i];
+            var val = $('#'+pname).val();
+            data_dict[pname]= val;
+            console.log(data_dict);
+            }
+         document.getElementById("datatable_thead").innerHTML="";
+         document.getElementById("datatable_body").innerHTML="";
+         var post_request = $.ajax({
+            type: 'POST',
+            url: '/run_report',
+            data : data_dict
+        });
+        post_request.done(function(data){
+                console.log(data)
+                //data=JSON.parse(data);
+                var thead=data.keys;
+                var tbody=data.data;
+                var head='';
+                for (var i = 0; i < thead.length; i++) {
+                  head=head+'<td>' + thead[i] +'</td>';
+                }
+               head=head+'';
+               document.getElementById('datatable_thead').innerHTML =head;
+               //body
+                var body='';
+                for (var i = 0; i < tbody.length; i++) {
+                 body=body+'<tr>'
+                    for (var j = 0; j < thead.length; j++) {
+                        var column_name=thead[j];
+                         body=body+'<td>' + tbody[i][column_name] +'</td>';
+                  }
+                  body=body+'</tr>'
+
+                }
+
+            body=body+'';
+
+            var cols = [];
+            var keys=data.keys;
+            keys.forEach(function(k) {
+                cols.push({
+                    title: k,
+                    data: k
+                    //optionally do some type detection here for render function
+                });
+              });
+            var currentDate = new Date()
+            var day = currentDate.getDate()
+            var month = currentDate.getMonth() + 1
+            var year = currentDate.getFullYear()
+            var d = day + "-" + month + "-" + year;
+            document.getElementById('datatable_body').innerHTML =body;
+            $("#dataTable").dataTable().fnDestroy();
+            var table = $('#dataTable').DataTable({
+                columns: cols,
+                dom: 'Bfrtip',
+                buttons: [
+                     {
+                        extend: 'excelHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    'copy', 'print' ],
+             });
+        });
+      }
+</script>
+{% endblock %}

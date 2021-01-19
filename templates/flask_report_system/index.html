@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="UTF-8">
+    <title>Flask Report System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/styles.352a605f.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/bootstrap.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/bootstrap-theme.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/bootstrap-theme.min.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/bootstrap.min.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/font-awesome.min.css')}}">
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/styles.352a605f.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/bootstrap-table.min.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/jquery.dataTables.min.css')}}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',  filename='css/flask_report_system/buttons.dataTables.min.css')}}">
+
+    <script src="{{ url_for('static',  filename='js/flask_report_system/jquery.min.js')}}"></script>   <!-- 2.2.4 -->
+    <script src="{{ url_for('static',  filename='js/flask_report_system/bootstrap-table.min.js')}}"></script>  <!-- 1.14.2-->
+    <script src="{{ url_for('static',  filename='js/flask_report_system/jquery-3.5.1.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/datatables.min.js')}}"></script> <!--3.3.7 -->
+    <script src="{{ url_for('static',  filename='js/flask_report_system/bootstrap.js')}}"></script>
+
+    <script src="{{ url_for('static',  filename='js/flask_report_system/3.3.7_bootstrap.min.js')}}"></script> <!-- 3.3.7 -->
+    <script src="{{ url_for('static',  filename='js/flask_report_system/3.4.1_bootstrap.min.js')}}"></script> <!-- 3.3.7 -->
+
+    <script src="{{ url_for('static',  filename='js/flask_report_system/dataTables.buttons.min.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/buttons.flash.min.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/jszip.min.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/pdfmake.min.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/vfs_fonts.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/buttons.html5.min.js')}}"></script>
+    <script src="{{ url_for('static',  filename='js/flask_report_system/buttons.print.min.js')}}"></script>
+
+
+</head>
+
+
+
+
+<nav class="navbar navbar-default navbar-inverse" role="navigation">
+  <div class="container-fluid">
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+
+            <li class="{% if request.endpoint=='home' %}active{%endif %}"><a href="{{  url_for('home') }}">Home</a></li>
+            <li class="{% if request.endpoint=='list_reports' or request.endpoint=='flask_report_details' %}active{%endif %}"><a href="{{  url_for('list_reports') }}">List Of Reports</a></li>
+      </ul>
+
+
+  <ul class="nav navbar-nav" role="tablist">
+
+
+    <li role="presentation" class="dropdown {% if request.endpoint=='edit_report_list'
+                or request.endpoint=='create_flask_report'
+                  or request.endpoint=='param_data' %}active{%endif %}"> <a href="#" class="dropdown-toggle" id="drop6" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Admin <span class="caret"></span> </a>
+      <ul class="dropdown-menu" id="menu3" aria-labelledby="drop6">
+        <li><a href="{{  url_for('edit_report_list') }}">Manage Reports</a></li>
+        <li><a href="{{  url_for('param_data') }}">Manage Parameters</a></li>
+
+      </ul>
+    </li>
+  </ul>
+<!--</div>-->
+
+
+    </div><!-- /.navbar-collapse -->
+
+  </div><!-- /.container-fluid -->
+
+
+
+</nav>
+
+ <body style="background:#f1f1f1">
+ {% block content %}{% endblock %}
+
+ </body>

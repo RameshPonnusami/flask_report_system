@@ -30,7 +30,7 @@ def queryset_to_dict(query_result):
 
 @app.route('/',methods=['GET','POST'])
 def home():
-    return  render_template('home.html')
+    return  render_template('flask_report_system/home.html')
 
 @app.route('/create_flask_parameter',methods=['GET','POST'])
 def flask_make_param():
@@ -57,22 +57,23 @@ def create_flask_report():
             report.params.append(param)
         db.session.add(report)
         db.session.commit()
+        return redirect(url_for('list_reports'))
     params=db.session.query(FlaskParameter.id,FlaskParameter.parameter_label,
                             FlaskParameter.parameter_name,functions.concat('${',expression.cast(FlaskParameter.parameter_name
                                                                                            ,types.Unicode),'}').label('parameter_full_name'))
-    return render_template("add_report.html",params=params)
+    return render_template("flask_report_system/add_report.html",params=params)
 
 @app.route('/list_reports',methods=['GET','POST'])
 def list_reports():
     params = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,
                               FlaskReport.report_type).filter(FlaskReport.is_active == True)
-    return render_template('list_report.html',params=params)
+    return render_template('flask_report_system/list_report.html',params=params)
 
 @app.route('/edit_report_list',methods=['GET','POST'])
 def edit_report_list():
     params = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,
                               FlaskReport.report_type).filter(FlaskReport.is_active == True)
-    return render_template('edit_report_list.html',params=params)
+    return render_template('flask_report_system/edit_report_list.html',params=params)
 
 
 @app.route('/flask_edit_report_details/<int:id>',methods=['GET','POST'])
@@ -119,7 +120,7 @@ def flask_edit_report_details(id):
                                                                          , types.Unicode), '}').label(
                                       'parameter_full_name'))
         added_param=json.dumps(queryset_to_dict(report_param.all()))
-        return render_template('edit_report.html', report=reportdetails,params=params,added_param=added_param)
+        return render_template('flask_report_system/edit_report.html', report=reportdetails,params=params,added_param=added_param)
 @app.route('/flask_report_details/<int:id>',methods=['GET','POST'])
 def flask_report_details(id):
     reportdetails = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,FlaskReport.report_type,
@@ -181,7 +182,7 @@ def flask_report_details(id):
                 parentdict['children'].append(childict)
         parent_params.append(parentdict)
 
-    return render_template('run_report.html',param=listdict,report_name=reportdetails.name,
+    return render_template('flask_report_system/run_report.html',param=listdict,report_name=reportdetails.name,
                            plist=paramereter_list,report_id=id,plistid=paramereter_list_id,
                            parent_data=parent_params)
 
@@ -209,7 +210,10 @@ def run_report():
         result_query = result_query.fetchall()
         queryset=queryset_to_dict(result_query)
         dataset={"keys":columns_names,"data":queryset}
-        return make_response(json.dumps(dataset,default=default))
+        response=json.dumps(dataset,default=default)
+        response = make_response(response)
+        response.content_type = 'application/json'
+        return make_response(response)
 
 
 @app.route('/child_dropdown',methods=['GET','POST'])
@@ -264,7 +268,7 @@ def param_data():
         fp=FlaskParameter.query.all()
         cols=get_model_columns(FlaskParameter)
         fp=convert_object_into_dict(fp, cols)
-        return render_template('edit_param_list.html',fp=fp)
+        return render_template('flask_report_system/edit_param_list.html',fp=fp)
 
 @app.route('/param_details/<int:id>',methods=['GET','POST'])
 def param_details(id):
@@ -284,7 +288,7 @@ def param_details(id):
                                         FlaskParameter.parameter_name,
                                         FlaskParameter.id).filter(FlaskParameter.id==parent_id).all()
         added_params=queryset_to_dict(added_param)
-        return render_template('edit_param.html',param=fp,params=params,added_params=added_params)
+        return render_template('flask_report_system/edit_param.html',param=fp,params=params,added_params=added_params)
 
     if request.method == 'POST':
         print(request.form)
@@ -332,7 +336,7 @@ def add_parameter():
                                   functions.concat('${', expression.cast(FlaskParameter.parameter_name
                                                                          , types.Unicode), '}').label(
                                       'parameter_full_name'))
-        return render_template('add_param.html',params=params)
+        return render_template('flask_report_system/add_param.html',params=params)
 
 
 @app.route('/delete_param/<int:id>',methods=['GET','POST'])

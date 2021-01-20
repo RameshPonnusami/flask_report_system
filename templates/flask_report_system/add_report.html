@@ -128,7 +128,7 @@
                     {% for p in params %}
                     <tr>
                         <td> {{ p.parameter_label }}</td>
-                        <td> {{ p.parameter_full_name }}</td>
+                        <td> <b>${</b><b>{{ p.parameter_name }}</b><b>}</b></td>
                     </tr>
                     {% endfor %}
                     </tbody>

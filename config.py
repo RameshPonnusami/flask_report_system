@@ -8,7 +8,9 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 db_name = 'database.db'
 db_path = os.path.join(os.path.dirname(__file__), db_name)
-db_uri = 'postgresql://postgres:DvaraDev@1234#@localhost:5432/flask_report'
+print(db_path)
+db_uri= 'sqlite:///database.db'
+# db_uri = 'postgresql://postgres:DvaraDev@1234#@localhost:5432/flask_report'
 print(db_uri)
 
 class Config:
@@ -24,6 +26,7 @@ class ProdConfig(Config):
     DEBUG = False
     TESTING = False
     DATABASE_URI = os.environ.get('PROD_DATABASE_URI')
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
 class DevConfig(Config):
@@ -32,5 +35,6 @@ class DevConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI =db_uri
+    SQLALCHEMY_TRACK_MODIFICATIONS=True
    # SQLALCHEMY_TRACK_MODIFICATIONS = False
 

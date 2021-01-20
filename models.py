@@ -33,6 +33,8 @@ class FlaskParameter(db.Model):
     parent_id = db.Column(db.Integer,nullable=True)
     reportparams = db.relationship('FlaskReportParameter')
 
+    func.concat
+
 class FlaskReportParameter(db.Model):
     __tablename__='flask_report_parameter'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

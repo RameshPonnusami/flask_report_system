@@ -103,18 +103,47 @@ var plist_id= {{ plistid | safe }};
 var plist_names= {{ plist | safe }};
 var parent_data= {{ parent_data | safe }};
 var report_name='{{ report_name }}';
-console.log(r_id);
+
+    function loadDataTable(cols){
+    var currentDate = new Date()
+            var day = currentDate.getDate()
+            var month = currentDate.getMonth() + 1
+            var year = currentDate.getFullYear()
+            var d = day + "-" + month + "-" + year;
+            var table = $('#dataTable').DataTable({
+                columns:cols,
+                dom: 'Bfrtip',
+                buttons: [
+                     {
+                        extend: 'excelHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        title: report_name+'_'+day+'_'+month+'_'+year,
+                        footer: true
+                    },
+                    'copy', 'print' ],
+             });
+    }
+
     function dropdownCheck(element){
         var element_id=element.id;
         var element_selected_val = $('#'+element_id).val();
-        console.log(element_id);
+
         dataItems = parent_data.map((parentitem) => {
-            console.log(parentitem);
+
             var parent_element_data=parentitem;
             if (parentitem.parent_param_label == element_id)
                  {
                     parent_element_data.children.map((childitem) => {
-                        console.log(childitem.child_param_label);
+
                         var child_param_id=childitem.child_param_id;
                         var child_param_label=childitem.child_param_label;
                         // ajax call start
@@ -126,7 +155,7 @@ console.log(r_id);
                                                 data : data_dict
                                             });
                          post_request.done(function(data){
-                            console.log(data);
+
                             child_data=JSON.parse(data);
                             var child_dropdown_id=child_data.child_dropdown_id;
                             var child_dropdown_id ='#'+child_dropdown_id;
@@ -144,6 +173,7 @@ console.log(r_id);
 
     function runReport(){
         data_dict={};
+        var data='';
         data_dict['report_id']=r_id;
         data_dict['plistid']=plist_id;
         data_dict['plist_names']=plist_names;
@@ -152,7 +182,7 @@ console.log(r_id);
             pname=plist[i];
             var val = $('#'+pname).val();
             data_dict[pname]= val;
-            console.log(data_dict);
+
             }
          document.getElementById("datatable_thead").innerHTML="";
          document.getElementById("datatable_body").innerHTML="";
@@ -173,9 +203,10 @@ console.log(r_id);
                head=head+'';
                document.getElementById('datatable_thead').innerHTML =head;
                //body
+
                 var body='';
                 for (var i = 0; i < tbody.length; i++) {
-                 body=body+'<tr>'
+                    body=body+'<tr>'
                     for (var j = 0; j < thead.length; j++) {
                         var column_name=thead[j];
                          body=body+'<td>' + tbody[i][column_name] +'</td>';
@@ -195,34 +226,29 @@ console.log(r_id);
                     //optionally do some type detection here for render function
                 });
               });
-            var currentDate = new Date()
-            var day = currentDate.getDate()
-            var month = currentDate.getMonth() + 1
-            var year = currentDate.getFullYear()
-            var d = day + "-" + month + "-" + year;
+            console.log(body);
+
             document.getElementById('datatable_body').innerHTML =body;
-            $("#dataTable").dataTable().fnDestroy();
-            var table = $('#dataTable').DataTable({
-                columns: cols,
-                dom: 'Bfrtip',
-                buttons: [
-                     {
-                        extend: 'excelHtml5',
-                        title: report_name+'_'+day+'_'+month+'_'+year,
-                        footer: true
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        title: report_name+'_'+day+'_'+month+'_'+year,
-                        footer: true
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        title: report_name+'_'+day+'_'+month+'_'+year,
-                        footer: true
-                    },
-                    'copy', 'print' ],
-             });
+
+            if ( ! $.fn.DataTable.isDataTable( '#dataTable' ) ) {
+                  loadDataTable(cols);
+                }
+             else{
+             console.log(thead.length);
+             col_length=thead.length;
+             //col_length='"'+col_length+'"';
+              if (tbody.length==0)
+                {
+                  body='<tr> <td colspan='+'"'+col_length+'"'+'style="text-align:center;" >No data available in table</td></tr>'
+                        }
+            document.getElementById('datatable_body').innerHTML =body;
+
+             }
+
+           // if (dataTable is not defined){
+            //loadDataTable(cols);
+            //}
+
         });
       }
 </script>

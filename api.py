@@ -57,7 +57,8 @@ def create_flask_report():
             report.params.append(param)
         db.session.add(report)
         db.session.commit()
-        return redirect(url_for('list_reports'))
+        return redirect(url_for('edit_report_list'))
+    ''' Concat not working in sqlite database '''
     # params=db.session.query(FlaskParameter.id,FlaskParameter.parameter_label,
     #                         FlaskParameter.parameter_name,functions.concat('${',expression.cast(FlaskParameter.parameter_name
     #                                                                                        ,types.Unicode),'}').label('parameter_full_name'))
@@ -204,13 +205,16 @@ def run_report():
             filterparam='${'+pn+'}'
             exec_query=exec_query.replace(filterparam,request.form.get(pn))
 
-
-        result_query = db.session.execute(exec_query)
-        # cursor.execute(role_query)
-        columns_names = result_query._metadata.keys
-        result_query = result_query.fetchall()
-        queryset=queryset_to_dict(result_query)
-        dataset={"keys":columns_names,"data":queryset}
+        try:
+            result_query = db.session.execute(exec_query)
+            # cursor.execute(role_query)
+            columns_names = result_query._metadata.keys
+            result_query = result_query.fetchall()
+            queryset=queryset_to_dict(result_query)
+            dataset = {"keys": columns_names, "data": queryset}
+        except Exception as e:
+            print(e)
+            dataset={"keys":[],"data":[],"msg":" Error while processing! Contact your admin "+" Error is ==>"+str(e)}
         response=json.dumps(dataset,default=default)
         response = make_response(response)
         response.content_type = 'application/json'

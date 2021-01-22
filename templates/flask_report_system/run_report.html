@@ -81,7 +81,12 @@
                 <span class="col-md-offset-1 paddedleft120"><a id="run" onclick="runReport()" class="btn btn-primary control binding">&nbsp;&nbsp;Run Report</a></span>
             </div>
         </form>
-        <br>
+<!--        <br>-->
+         <div id="alert_div" class="alert alert-info" style="visibility:hidden">
+                  <span class="pficon pficon-info"></span>
+                   <p id="alert_msg" style="display:inline"></p>
+         </div>
+
         <div class="container-fluid">
             <div class="panel panel-default">
                 <div id="table_container" class="panel-body" style="background:#f1f1f1">
@@ -173,6 +178,9 @@ var report_name='{{ report_name }}';
 
     function runReport(){
         data_dict={};
+        $('#status_msg').empty();
+        $("#alert_msg").empty();
+        $('#alert_div').css("visibility","hidden");
         var data='';
         data_dict['report_id']=r_id;
         data_dict['plistid']=plist_id;
@@ -194,7 +202,14 @@ var report_name='{{ report_name }}';
         post_request.done(function(data){
                 console.log(data)
                 //data=JSON.parse(data);
+
                 var thead=data.keys;
+                if (thead.length==0){
+                    var error_msg=data.msg;
+                    $('#alert_div').css("visibility","visible");
+                    $('#alert_msg').css("color","#ff4a00");
+                    $('#alert_msg').text(error_msg);
+                    }
                 var tbody=data.data;
                 var head='';
                 for (var i = 0; i < thead.length; i++) {
@@ -240,7 +255,7 @@ var report_name='{{ report_name }}';
               if (tbody.length==0)
                 {
                   body='<tr> <td colspan='+'"'+col_length+'"'+'style="text-align:center;" >No data available in table</td></tr>'
-                        }
+                 }
             document.getElementById('datatable_body').innerHTML =body;
 
              }

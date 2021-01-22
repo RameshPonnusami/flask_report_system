@@ -141,15 +141,17 @@ var report_name='{{ report_name }}';
     function dropdownCheck(element){
         var element_id=element.id;
         var element_selected_val = $('#'+element_id).val();
-
         dataItems = parent_data.map((parentitem) => {
-
             var parent_element_data=parentitem;
-            if (parentitem.parent_param_label == element_id)
-                 {
+            if (parentitem.parent_param_label == element_id)                 {
                     parent_element_data.children.map((childitem) => {
-
                         var child_param_id=childitem.child_param_id;
+
+                        //Remove data from child dropdowns while update
+                        var child_dropdown_id ='#'+childitem.child_param_label;
+                        $(child_dropdown_id).empty();
+                        //
+
                         var child_param_label=childitem.child_param_label;
                         // ajax call start
                         data_dict={"parent_value":element_selected_val,"parent_label":element_id,
@@ -160,7 +162,6 @@ var report_name='{{ report_name }}';
                                                 data : data_dict
                                             });
                          post_request.done(function(data){
-
                             child_data=JSON.parse(data);
                             var child_dropdown_id=child_data.child_dropdown_id;
                             var child_dropdown_id ='#'+child_dropdown_id;
@@ -175,6 +176,11 @@ var report_name='{{ report_name }}';
                  }
         });
     }
+    function checkFilter(){
+         $('#alert_div').css("visibility","visible");
+         $('#alert_msg').css("color","#ff4a00");
+         $('#alert_msg').text("Please select value");
+        }
 
     function runReport(){
         data_dict={};
@@ -186,85 +192,90 @@ var report_name='{{ report_name }}';
         data_dict['plistid']=plist_id;
         data_dict['plist_names']=plist_names;
         var i;
+        var is_empty=0;
         for (i = 0; i < plist.length; i++) {
             pname=plist[i];
             var val = $('#'+pname).val();
             data_dict[pname]= val;
-
+            if (val==''){
+                is_empty=-1;
+                checkFilter()
+                }
             }
          document.getElementById("datatable_thead").innerHTML="";
          document.getElementById("datatable_body").innerHTML="";
-         var post_request = $.ajax({
-            type: 'POST',
-            url: '/run_report',
-            data : data_dict
-        });
-        post_request.done(function(data){
-                console.log(data)
-                //data=JSON.parse(data);
+         if (is_empty==0){
+             var post_request = $.ajax({
+                type: 'POST',
+                url: '/run_report',
+                data : data_dict
+            });
+            post_request.done(function(data){
+                    console.log(data)
+                    //data=JSON.parse(data);
 
-                var thead=data.keys;
-                if (thead.length==0){
-                    var error_msg=data.msg;
-                    $('#alert_div').css("visibility","visible");
-                    $('#alert_msg').css("color","#ff4a00");
-                    $('#alert_msg').text(error_msg);
+                    var thead=data.keys;
+                    if (thead.length==0){
+                        var error_msg=data.msg;
+                        $('#alert_div').css("visibility","visible");
+                        $('#alert_msg').css("color","#ff4a00");
+                        $('#alert_msg').text(error_msg);
+                        }
+                    var tbody=data.data;
+                    var head='';
+                    for (var i = 0; i < thead.length; i++) {
+                      head=head+'<td>' + thead[i] +'</td>';
                     }
-                var tbody=data.data;
-                var head='';
-                for (var i = 0; i < thead.length; i++) {
-                  head=head+'<td>' + thead[i] +'</td>';
-                }
-               head=head+'';
-               document.getElementById('datatable_thead').innerHTML =head;
-               //body
+                   head=head+'';
+                   document.getElementById('datatable_thead').innerHTML =head;
+                   //body
 
-                var body='';
-                for (var i = 0; i < tbody.length; i++) {
-                    body=body+'<tr>'
-                    for (var j = 0; j < thead.length; j++) {
-                        var column_name=thead[j];
-                         body=body+'<td>' + tbody[i][column_name] +'</td>';
-                  }
-                  body=body+'</tr>'
+                    var body='';
+                    for (var i = 0; i < tbody.length; i++) {
+                        body=body+'<tr>'
+                        for (var j = 0; j < thead.length; j++) {
+                            var column_name=thead[j];
+                             body=body+'<td>' + tbody[i][column_name] +'</td>';
+                      }
+                      body=body+'</tr>'
 
-                }
+                    }
 
-            body=body+'';
+                body=body+'';
 
-            var cols = [];
-            var keys=data.keys;
-            keys.forEach(function(k) {
-                cols.push({
-                    title: k,
-                    data: k
-                    //optionally do some type detection here for render function
-                });
-              });
-            console.log(body);
+                var cols = [];
+                var keys=data.keys;
+                keys.forEach(function(k) {
+                    cols.push({
+                        title: k,
+                        data: k
+                        //optionally do some type detection here for render function
+                    });
+                  });
+                console.log(body);
 
-            document.getElementById('datatable_body').innerHTML =body;
+                document.getElementById('datatable_body').innerHTML =body;
 
-            if ( ! $.fn.DataTable.isDataTable( '#dataTable' ) ) {
-                  loadDataTable(cols);
-                }
-             else{
-             console.log(thead.length);
-             col_length=thead.length;
-             //col_length='"'+col_length+'"';
-              if (tbody.length==0)
-                {
-                  body='<tr> <td colspan='+'"'+col_length+'"'+'style="text-align:center;" >No data available in table</td></tr>'
+                if ( ! $.fn.DataTable.isDataTable( '#dataTable' ) ) {
+                      loadDataTable(cols);
+                    }
+                 else{
+                 console.log(thead.length);
+                 col_length=thead.length;
+                 //col_length='"'+col_length+'"';
+                  if (tbody.length==0)
+                    {
+                      body='<tr> <td colspan='+'"'+col_length+'"'+'style="text-align:center;" >No data available in table</td></tr>'
+                     }
+                document.getElementById('datatable_body').innerHTML =body;
+
                  }
-            document.getElementById('datatable_body').innerHTML =body;
 
-             }
-
-           // if (dataTable is not defined){
-            //loadDataTable(cols);
-            //}
-
-        });
+            });
+          }
+         else{
+         console.log("please fill values");
+         }
       }
 </script>
 {% endblock %}

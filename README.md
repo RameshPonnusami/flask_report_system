@@ -17,5 +17,16 @@ Features:
 Parameter(filters can be configured in db like following)
 ![alt text](static/images/screenshots/Parameter_data_example.JPG)
 
+```pip install -r  requirements.txt
+   python manage.py init db
+    ```
+if you dont see any examples in database:
+run the script to load examples
+``` python load_examples.py ```
+
+To Run the server:
+python manage.py runserver
+
+
 
 

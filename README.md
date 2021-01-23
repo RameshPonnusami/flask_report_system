@@ -9,6 +9,8 @@ Features:
 2. Add Filter like dropdown,date,text dynamically.
 3. Everything configured in Database so it will be moduler.
 4. Dependent dropdown also available dynamically
+Workflow gif
+![alt text](static/images/workflow_gif.gif)
 
 ![alt text](static/images/screenshots/Add_edit_report.JPG)
 ![alt text](static/images/screenshots/Manage_reports.JPG)
@@ -17,9 +19,9 @@ Features:
 Parameter(filters can be configured in db like following)
 ![alt text](static/images/screenshots/Parameter_data_example.JPG)
 
-```pip install -r  requirements.txt
-   python manage.py init db
-    ```
+```pip install -r  requirements.txt ```
+```python manage.py init db ```
+
 if you dont see any examples in database:
 run the script to load examples
 ``` python load_examples.py ```

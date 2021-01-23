@@ -8,7 +8,9 @@ Features:
 1. Add reports dynamically from UI
 2. Add Filter like dropdown,date,text dynamically.
 3. Everything configured in Database so it will be moduler.
-4. Dependent dropdown also available dynamically
+4. Dependent dropdown also available dynamically.
+
+
 Workflow gif
 ![alt text](static/images/workflow_gif.gif)
 
@@ -19,15 +21,25 @@ Workflow gif
 Parameter(filters can be configured in db like following)
 ![alt text](static/images/screenshots/Parameter_data_example.JPG)
 
-```pip install -r  requirements.txt ```
-```python manage.py init db ```
+```python
+    pip install -r  requirements.txt 
+    python manage.py init db 
+```
 
 if you dont see any examples in database:
 run the script to load examples
-``` python load_examples.py ```
+
+```python
+ python load_examples.py
+```
 
 To Run the server:
-python manage.py runserver
+```python
+   python manage.py runserver
+```
+
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 
 

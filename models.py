@@ -33,10 +33,24 @@ class FlaskParameter(db.Model):
     parent_id = db.Column(db.Integer,nullable=True)
     reportparams = db.relationship('FlaskReportParameter')
 
-    func.concat
+
 
 class FlaskReportParameter(db.Model):
     __tablename__='flask_report_parameter'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     report_id = db.Column(db.Integer(), db.ForeignKey('flask_report.id'))
     parameter_id = db.Column(db.Integer(), db.ForeignKey('flask_parameter.id'))
+
+import enum
+class ApplyColorEnum(enum.IntEnum):
+    complete_row = 1
+    only_column = 2
+class FlaskReportDataColor(db.Model):
+    __tablename__='flask_report_data_color'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    report_id = db.Column(db.Integer(), db.ForeignKey('flask_report.id'))
+    field_name= db.Column(db.String(50),nullable=True)
+    condition= db.Column(db.String(200),nullable=True)
+    color= db.Column(db.String(20),nullable=True)
+    apply_level = db.Column(db.Integer(),default=1,nullable=True)
+

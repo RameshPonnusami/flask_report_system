@@ -30,6 +30,11 @@
   color: white;
 }
 
+#dataTable tbody {
+  color: black;
+}
+
+
 
 </style>
 
@@ -107,7 +112,29 @@ var r_id= {{ report_id | safe }};
 var plist_id= {{ plistid | safe }};
 var plist_names= {{ plist | safe }};
 var parent_data= {{ parent_data | safe }};
+var color_data= {{ color | safe }};
 var report_name='{{ report_name }}';
+
+function change_row_color(column,condition,color)
+{
+ $('.item').each(function(){
+        var value = $(this).find("."+column).text();
+        if(eval(condition)){
+            $(this).css('background',color);
+        }
+    });
+}
+
+function change_column_color(column,condition,color)
+        {
+            $("#dataTable td."+column).each(function() {
+                    var value = parseInt($(this).html());
+                     if(eval(condition)){
+                        $(this).css('background',color);
+                        }
+             });
+        }
+
 
     function loadDataTable(cols){
     var currentDate = new Date()
@@ -115,7 +142,9 @@ var report_name='{{ report_name }}';
             var month = currentDate.getMonth() + 1
             var year = currentDate.getFullYear()
             var d = day + "-" + month + "-" + year;
+
             var table = $('#dataTable').DataTable({
+             "stripeClasses": [],
                 columns:cols,
                 dom: 'Bfrtip',
                 buttons: [
@@ -135,7 +164,9 @@ var report_name='{{ report_name }}';
                         footer: true
                     },
                     'copy', 'print' ],
+
              });
+
     }
 
     function dropdownCheck(element){
@@ -232,10 +263,12 @@ var report_name='{{ report_name }}';
 
                     var body='';
                     for (var i = 0; i < tbody.length; i++) {
-                        body=body+'<tr>'
+                        body=body+'<tr class="item">'
+                        console.log(body);
                         for (var j = 0; j < thead.length; j++) {
                             var column_name=thead[j];
-                             body=body+'<td>' + tbody[i][column_name] +'</td>';
+                            console.log(column_name);
+                             body=body+'<td class ="'+column_name+'">' + tbody[i][column_name] +'</td>';
                       }
                       body=body+'</tr>'
 
@@ -270,6 +303,24 @@ var report_name='{{ report_name }}';
                 document.getElementById('datatable_body').innerHTML =body;
 
                  }
+
+                 color_data.map((color_item) => {
+                       var color_condition=color_item.condition;
+                       var color_column=color_item.field_name;
+                       var color_code=color_item.color;
+                       var color_apply_level=color_item.apply_level;
+
+                        if (color_apply_level==2){
+                            change_column_color(color_column,color_condition,color_code);
+                            }else{
+                            change_row_color(color_column,color_condition,color_code);
+                            }
+
+                       });
+
+
+
+
 
             });
           }

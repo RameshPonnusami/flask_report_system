@@ -1,14 +1,17 @@
 from app import app,db
-from models import FlaskReport,FlaskReportParameter,FlaskParameter
+from models import FlaskReport,FlaskReportParameter,FlaskParameter,FlaskReportDataColor
 from flask import render_template,request,url_for,redirect,make_response
 import json
 from sqlalchemy.sql import expression, functions
 from sqlalchemy import types
 from datetime import datetime, date
+from decimal import *
 
 def default(o):
     if isinstance(o, (date, datetime)):
         return o.isoformat()
+    if isinstance(o, Decimal):
+        return "%.2f" % o
 
 def get_model_columns(instance, exclude=[]):
     columns = instance.__table__.columns.keys()
@@ -166,7 +169,7 @@ def flask_report_details(id):
     parent_id_list = list(set(parent_id_list))
 
 
-    print(parent_id_listdict)
+
     parent_params = []
     param_all_data=queryset_to_dict(report_param.all())
     if len(param_all_data)>1:
@@ -183,10 +186,17 @@ def flask_report_details(id):
                     childict['child_param_id'] = ch
                     parentdict['children'].append(childict)
             parent_params.append(parentdict)
-    print(listdict,reportdetails.name,paramereter_list,id,paramereter_list_id)
+    #return color condition
+    colorcode = FlaskReportDataColor.query.filter(FlaskReportDataColor.report_id == id).all()
+    color_cols = get_model_columns(FlaskReportDataColor)
+    if colorcode is not None:
+        color_data = convert_object_into_dict(colorcode, color_cols)
+    else:
+        color_data = []
+    ##
     return render_template('flask_report_system/run_report.html',param=listdict,report_name=reportdetails.name,
                            plist=paramereter_list,report_id=id,plistid=paramereter_list_id,
-                           parent_data=parent_params)
+                           parent_data=parent_params,color=color_data)
 
 
 
@@ -199,6 +209,8 @@ def run_report():
         plist_names=request.form.getlist('plist_names[]')
         reportdetails = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,FlaskReport.report_type,
                                   FlaskReport.sql_query).filter(FlaskReport.is_active == True,FlaskReport.id ==report_id ).first()
+
+
         exec_query=reportdetails.sql_query
         for pn in plist_names:
             #ex:${startDate}

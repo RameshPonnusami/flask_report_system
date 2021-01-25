@@ -13,7 +13,7 @@ Features:
 
 Workflow gif
 ![alt text](static/images/workflow_gif.gif)
-
+![alt text](static/images/screenshots/add_color_render.JPG)
 ![alt text](static/images/screenshots/Add_edit_report.JPG)
 ![alt text](static/images/screenshots/Manage_reports.JPG)
 ![alt text](static/images/screenshots/db.JPG)

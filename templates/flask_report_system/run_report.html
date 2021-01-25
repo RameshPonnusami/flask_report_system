@@ -301,9 +301,7 @@ function change_column_color(column,condition,color)
                       body='<tr> <td colspan='+'"'+col_length+'"'+'style="text-align:center;" >No data available in table</td></tr>'
                      }
                 document.getElementById('datatable_body').innerHTML =body;
-
                  }
-
                  color_data.map((color_item) => {
                        var color_condition=color_item.condition;
                        var color_column=color_item.field_name;
@@ -315,13 +313,7 @@ function change_column_color(column,condition,color)
                             }else{
                             change_row_color(color_column,color_condition,color_code);
                             }
-
                        });
-
-
-
-
-
             });
           }
          else{

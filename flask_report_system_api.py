@@ -1,5 +1,5 @@
 from app import app,db
-from models import FlaskReport,FlaskReportParameter,FlaskParameter,FlaskReportDataColor
+from flask_report_system_models import FlaskReport,FlaskReportParameter,FlaskParameter,FlaskReportDataColor
 from flask import render_template,request,url_for,redirect,make_response
 import json
 from sqlalchemy.sql import expression, functions
@@ -45,6 +45,11 @@ def create_flask_report():
     #param: getting report details
     #retrun: add_report.html page with params
     if request.method=='POST':
+        color_field_name = request.form.getlist('color_field_name')
+        color_condition = request.form.getlist('color_condition')
+        color = request.form.getlist('color')
+        color_apply_level = request.form.getlist('color_apply_level')
+
         paramlist = request.form.getlist('selectedparam[]')
         reportname=request.form.get('reportname')
         reportType=request.form.get('reportType')
@@ -60,6 +65,14 @@ def create_flask_report():
             report.params.append(param)
         db.session.add(report)
         db.session.commit()
+
+
+        for i, cf in enumerate(color_field_name):
+            color_obj = FlaskReportDataColor(report_id=id, field_name=color_field_name[i], condition=color_condition[i],
+                                             color=color[i], apply_level=color_apply_level[i])
+            db.session.add(color_obj)
+        db.session.commit()
+
         return redirect(url_for('edit_report_list'))
     ''' Concat not working in sqlite database '''
     # params=db.session.query(FlaskParameter.id,FlaskParameter.parameter_label,
@@ -91,8 +104,6 @@ def flask_edit_report_details(id):
         color_condition = request.form.getlist('color_condition')
         color = request.form.getlist('color')
         color_apply_level = request.form.getlist('color_apply_level')
-        print('color_field_name',color_field_name,'color_condition',color_condition,'color',color,'color_apply_level',color_apply_level)
-
         paramlist = request.form.getlist('selectedparam[]')
         reportname = request.form.get('reportname')
         reportType = request.form.get('reportType')
@@ -184,7 +195,7 @@ def flask_report_details(id):
     parent_id_list = list(set(parent_id_list))
 
 
-
+    # generating dropdown fields along with dependent dropdown configuration
     parent_params = []
     param_all_data=queryset_to_dict(report_param.all())
     if len(param_all_data)>1:

@@ -49,6 +49,7 @@ def create_flask_report():
         color_condition = request.form.getlist('color_condition')
         color = request.form.getlist('color')
         color_apply_level = request.form.getlist('color_apply_level')
+        color_question = request.form.getlist('color_question')
 
         paramlist = request.form.getlist('selectedparam[]')
         reportname=request.form.get('reportname')
@@ -64,14 +65,16 @@ def create_flask_report():
             param = FlaskReportParameter(parameter_id=r)
             report.params.append(param)
         db.session.add(report)
-        db.session.commit()
+        #db.session.commit()
+        db.session.flush()
+        report_id=report.id
 
-
-        for i, cf in enumerate(color_field_name):
-            color_obj = FlaskReportDataColor(report_id=id, field_name=color_field_name[i], condition=color_condition[i],
-                                             color=color[i], apply_level=color_apply_level[i])
-            db.session.add(color_obj)
-        db.session.commit()
+        if len(color_question)>1:
+            for i, cf in enumerate(color_field_name):
+                color_obj = FlaskReportDataColor(report_id=report_id, field_name=color_field_name[i], condition=color_condition[i],
+                                                 color=color[i], apply_level=color_apply_level[i])
+                db.session.add(color_obj)
+            db.session.commit()
 
         return redirect(url_for('edit_report_list'))
     ''' Concat not working in sqlite database '''
@@ -104,6 +107,8 @@ def flask_edit_report_details(id):
         color_condition = request.form.getlist('color_condition')
         color = request.form.getlist('color')
         color_apply_level = request.form.getlist('color_apply_level')
+        color_question = request.form.getlist('color_question')
+
         paramlist = request.form.getlist('selectedparam[]')
         reportname = request.form.get('reportname')
         reportType = request.form.get('reportType')
@@ -126,10 +131,11 @@ def flask_edit_report_details(id):
         db.session.commit()
         FlaskReportDataColor.query.filter_by(report_id=id).delete()
         db.session.commit()
-        for  i,cf in enumerate(color_field_name):
-            color_obj = FlaskReportDataColor( report_id=id,field_name=color_field_name[i],condition=color_condition[i],color=color[i],apply_level=color_apply_level[i])
-            db.session.add(color_obj)
-        db.session.commit()
+        if len(color_question) > 1:
+            for  i,cf in enumerate(color_field_name):
+                color_obj = FlaskReportDataColor( report_id=id,field_name=color_field_name[i],condition=color_condition[i],color=color[i],apply_level=color_apply_level[i])
+                db.session.add(color_obj)
+            db.session.commit()
         return  redirect(url_for('edit_report_list'))
     else:
         reportdetails = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,FlaskReport.report_type,
@@ -142,7 +148,8 @@ def flask_edit_report_details(id):
                                         FlaskParameter.parent_id
                                         ).join(FlaskReportParameter,(FlaskReportParameter.parameter_id==FlaskParameter.id)).filter(
                                         FlaskReportParameter.report_id == id)
-        report_color = db.session.query(FlaskReportDataColor.field_name,FlaskReportDataColor.condition,FlaskReportDataColor.color,FlaskReportDataColor.apply_level)
+        report_color = db.session.query(FlaskReportDataColor.field_name,FlaskReportDataColor.condition,
+                                        FlaskReportDataColor.color,FlaskReportDataColor.apply_level).filter(FlaskReportDataColor.report_id==id)
 
         reportdetails={"sql":reportdetails.sql_query,"name":reportdetails.name,"description":reportdetails.description,
                        "report_category":reportdetails.report_category,"report_type":reportdetails.report_type,"id":id}

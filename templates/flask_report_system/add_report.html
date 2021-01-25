@@ -17,6 +17,7 @@
     table#selectedparamtable td + td+td ~ td {
    display: none;
 }
+.color_answer { display:none }
 
 </style>
 
@@ -111,6 +112,30 @@
                     </tbody>
                 </table>
                 <br>
+                <fieldset class="color_question">
+                      <label for="color_question">Do you like to add color on data while rendering?</label>
+                      <input id="color_question" type="checkbox" name="color_question" value="1" />
+                      <span class="item-text">Yes</span>
+                    </fieldset>
+                <div class="color_answer">
+                  <table id="selectcolorcode" name="selectcolorcode" width="100%" cellspacing="2px" style="border-spacing: 10px;border-collapse: separate;" >
+                           <thead>
+                            <tr class="graybg">
+                        <th id="fieldname" name="fieldname" class="binding">Field Name</th>
+                        <th id="condition" name="condition" class="binding">Condition</th>
+                        <th id="color" name="color" class="binding">Color</th>
+                        <th id="colorlevel" name="colorlevel" class="binding">Apply Level</th>
+                                <th id="dc" name="dc" class="binding">Actions</th>
+                    </tr>
+                           </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                         <span>
+                           <input type="button" class="btn btn-primary binding" onclick="addcolor()" value="Addcolor">
+                         </span>
+
+                    </div>
                 <input type="submit" class="btn btn-primary binding" style="margin:auto;display:block" value="Submit">
             </form>
         </div>
@@ -160,5 +185,31 @@ var myDropdown=document.getElementsByName('parametervalue');
       var row = btn.parentNode.parentNode;
       row.parentNode.removeChild(row);
     }
+</script>
+<script>
+//
+function addcolor(){
+console.log('trying to add color row');
+var deletestrcolor='<td><input type="button" id="deletecolor" value="Delete" onclick="deleteColorRow(this)"/></td>';
+var field_name='<tr><td> <input class="form-control" type="text" name="color_field_name" id="color_field_name" value="" /> </td>';
+var condition='<td> <textarea name="color_condition" id="color_condition" cols="20" rows="4" placeholder="enter javascript condition.EX: value>2000 && (value<3000 || value<2000) , here value is constant value represents the feildname that you mentioned in feild name "></textarea> </td> ';
+var color = '<td> <input class="form-control" type="text" id="color" name="color" value="" /> </td>';
+var apply_level='<td> <select id="color_apply_level" name="color_apply_level" onchange="getval(this);"><option value="1">Complete Row</option><option value="2">Column Only</option> </select> </td>'
+$('#selectcolorcode').find('tbody').append(field_name+condition+color+apply_level+deletestrcolor+'</tr>')
+  $('#selectcolorcode').show();
+}
+function deleteColorRow(btn) {
+      var row = btn.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
+</script>
+<script>
+ $(document).ready(function() {
+     $("#color_question").on("click",function() {
+    $(".color_answer").toggle(this.checked);
+  });
+} );
+
+
 </script>
 {% endblock %}

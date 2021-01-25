@@ -86,6 +86,13 @@ def edit_report_list():
 @app.route('/flask_edit_report_details/<int:id>',methods=['GET','POST'])
 def flask_edit_report_details(id):
     if request.method=='POST':
+        print(request.form)
+        color_field_name = request.form.getlist('color_field_name')
+        color_condition = request.form.getlist('color_condition')
+        color = request.form.getlist('color')
+        color_apply_level = request.form.getlist('color_apply_level')
+        print('color_field_name',color_field_name,'color_condition',color_condition,'color',color,'color_apply_level',color_apply_level)
+
         paramlist = request.form.getlist('selectedparam[]')
         reportname = request.form.get('reportname')
         reportType = request.form.get('reportType')
@@ -106,6 +113,12 @@ def flask_edit_report_details(id):
             param = FlaskReportParameter(parameter_id=r,report_id=id)
             db.session.add(param)
         db.session.commit()
+        FlaskReportDataColor.query.filter_by(report_id=id).delete()
+        db.session.commit()
+        for  i,cf in enumerate(color_field_name):
+            color_obj = FlaskReportDataColor( report_id=id,field_name=color_field_name[i],condition=color_condition[i],color=color[i],apply_level=color_apply_level[i])
+            db.session.add(color_obj)
+        db.session.commit()
         return  redirect(url_for('edit_report_list'))
     else:
         reportdetails = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,FlaskReport.report_type,
@@ -118,14 +131,16 @@ def flask_edit_report_details(id):
                                         FlaskParameter.parent_id
                                         ).join(FlaskReportParameter,(FlaskReportParameter.parameter_id==FlaskParameter.id)).filter(
                                         FlaskReportParameter.report_id == id)
+        report_color = db.session.query(FlaskReportDataColor.field_name,FlaskReportDataColor.condition,FlaskReportDataColor.color,FlaskReportDataColor.apply_level)
 
         reportdetails={"sql":reportdetails.sql_query,"name":reportdetails.name,"description":reportdetails.description,
                        "report_category":reportdetails.report_category,"report_type":reportdetails.report_type,"id":id}
         params = db.session.query(FlaskParameter.id, FlaskParameter.parameter_label,
                                   FlaskParameter.parameter_name
                                   )
-        added_param=json.dumps(queryset_to_dict(report_param.all()))
-        return render_template('flask_report_system/edit_report.html', report=reportdetails,params=params,added_param=added_param)
+        added_param=json.dumps(queryset_to_dict(report_param.all())) 
+        added_color=json.dumps(queryset_to_dict(report_color.all()))
+        return render_template('flask_report_system/edit_report.html', report=reportdetails,params=params,added_param=added_param,added_color=added_color)
 @app.route('/flask_report_details/<int:id>',methods=['GET','POST'])
 def flask_report_details(id):
     reportdetails = db.session.query(FlaskReport.id, FlaskReport.name,FlaskReport.report_category,FlaskReport.report_type,

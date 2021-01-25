@@ -109,6 +109,23 @@
 
                 </table>
                 <br>
+                       <table id="selectcolorcode" name="selectcolorcode" width="100%" cellspacing="2px" style="border-spacing: 10px;border-collapse: separate;" >
+                           <thead>
+                            <tr class="graybg">
+                        <th id="fieldname" name="fieldname" class="binding">Field Name</th>
+                        <th id="condition" name="condition" class="binding">Condition</th>
+                        <th id="color" name="color" class="binding">Color</th>
+                        <th id="colorlevel" name="colorlevel" class="binding">Apply Level</th>
+                                <th id="dc" name="dc" class="binding">Actions</th>
+                    </tr>
+                           </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                         <span>
+                           <input type="button" class="btn btn-primary binding" onclick="addcolor()" value="Addcolor">
+                         </span>
+
                 <input type="submit" class="btn btn-primary binding" style="margin:auto;display:block" value="Submit">
             </form>
         </div>
@@ -136,9 +153,30 @@
     </div>
 </div>
 </div>
+
+
+<script>
+//
+function addcolor(){
+console.log('trying to add color row');
+var deletestrcolor='<td><input type="button" id="deletecolor" value="Delete" onclick="deleteColorRow(this)"/></td>';
+var field_name='<tr><td> <input class="form-control" type="text" name="color_field_name" id="color_field_name" value="" /> </td>';
+var condition='<td> <textarea name="color_condition" id="color_condition" cols="20" rows="4" placeholder="enter javascript condition. EX value>2000 &&( value<3000 || value<2000 ), here value is constant value represents the feildname that you mentioned in feild name "></textarea> </td> ';
+var color = '<td> <input class="form-control" type="text" id="color" name="color" value="" /> </td>';
+var apply_level='<td> <select id="color_apply_level" name="color_apply_level" onchange="getval(this);"><option value="1">Complete Row</option><option value="2">Column Only</option> </select> </td>'
+$('#selectcolorcode').find('tbody').append(field_name+condition+color+apply_level+deletestrcolor+'</tr>');
+$('#selectcolorcode').show();
+}
+function deleteColorRow(btn) {
+      var row = btn.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
+</script>
 <script>
 var added_param={{added_param |  safe }};
+var added_color={{added_color |  safe }};
 console.log(added_param);
+//adding selected params and added color
 for ( var i = 0, l = added_param.length; i < l; i++ ) {
     console.log(added_param[i]);
      var  tablerow='<td style="display:none;" > <input id="selectedparam" name="selectedparam[]" type="text" value="'+added_param[i]['id'] +'"readonly></td>'
@@ -146,8 +184,24 @@ for ( var i = 0, l = added_param.length; i < l; i++ ) {
         var deletestr='<td><input type="button" id="delete" value="Delete" onclick="deleteRow(this)"/></td>';
         console.log(deletestr);
         $(selectedparamtable).find('tbody').append("<tr><td id='selectedparamlabel' name='selectedparamlabel'>"+added_param[i]['parameter_label']+"</td>"+tablerow+deletestr+"</tr>");
+    }
 
-}
+for ( var i = 0, l = added_color.length; i < l; i++ ) {
+    console.log(added_color[i]);
+    var field_name='<tr><td> <input class="form-control" type="text" name="color_field_name" id="color_field_name" value="'+added_color[i]['field_name']+'" /> </td>';
+    var condition = '<td> <textarea name="color_condition" id="color_condition" cols="20" rows="4">'+added_color[i]['condition']+'</textarea> </td>'
+     var color = '<td> <input class="form-control" type="text" id="color" name="color" value="'+added_color[i]['color']+'" /> </td><td>'
+     if (added_color[i]['apply_level']==2){
+      var apply_level= '<select id="color_apply_level" name="color_apply_level" onchange="getval(this);"><option value="1">Complete Row</option><option selected="selected" value="2">Column Only</option> </select> </td>'
+      }
+      else{
+      var apply_level= '<select id="color_apply_level" name="color_apply_level" onchange="getval(this);"><option selected="selected"  value="1">Complete Row</option><option value="2">Column Only</option> </select> </td>'
+      }
+       var deletestrcolor='<td><input type="button" id="deletecolor" value="Delete" onclick="deleteColorRow(this)"/></td>';
+      var deleterow=deletestrcolor+' </tr>';
+      $('#selectcolorcode').find('tbody').append(field_name+condition+color+apply_level+deletestr);
+    }
+
 
     $(document).ready(function() {
     $('#list_reports').DataTable();

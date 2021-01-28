@@ -2,6 +2,11 @@
 {% block title %}List Of Reports{% endblock %}
 {% block content %}
 <style>
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
      div.dataTables_wrapper {
         width: auto;
         border:  #f1f1f1;
@@ -35,8 +40,6 @@
   color: black;
 }
 
-
-
 </style>
 
 <div class="container">
@@ -44,7 +47,10 @@
         <li><a href="{{  url_for('list_reports') }}" class="ng-binding">Reports</a></li>
         <li class="active ng-binding">Run Report</li>
     </ul>
+
     <div class="card well">
+        <div class="row">
+        <div class="col-md-18">
         <form class="form-signin" name="report_form" id="report_form" method="post" role="form">
             <div class="span gray-head" style="margin-left:0%;height:30px;">
               <span style="margin-left: 10px;font-size:20px;">
@@ -69,6 +75,10 @@
                             {% endfor %}
                         </select>
                     </div>
+                    {% if loop.index==1 %}
+                     <div id="ajaxspinner" class="col-sm-2" >
+                    </div>
+                    {% endif %}
                     {% elif pr['display_type']=='date' %}
                     <div class="col-sm-3">
                         <input type="date" id="{{ pr['parameter_name'] }}" name="">
@@ -83,19 +93,31 @@
                     </div>
                     {% endif %}
                 </div>
+
                 {% endfor %}
+
+
                 <span class="col-md-offset-1 paddedleft120"><a id="run" onclick="runReport()" class="btn btn-primary control binding">&nbsp;&nbsp;Run Report</a></span>
             </div>
         </form>
+        </div>
+             <div class="col-md-4">
+
+             </div>
+        </div>
 <!--        <br>-->
          <div id="alert_div" class="alert alert-info" style="visibility:hidden">
                   <span class="pficon pficon-info"></span>
                    <p id="alert_msg" style="display:inline"></p>
          </div>
 
+
         <div class="container-fluid">
             <div class="panel panel-default">
+
                 <div id="table_container" class="panel-body" style="background:#f1f1f1">
+                     <div id="ajaxspinnertable" >
+                    </div>
                     <table id="dataTable" class="cell-border" style="width:100%">
                         <thead id="datatable_thead" class="cell-border" style="width:100%;background-color: #27507F;color: white;">
                         </thead>
@@ -172,8 +194,10 @@ function change_column_color(column,condition,color)
     }
 
     function dropdownCheck(element){
+
         var element_id=element.id;
         var element_selected_val = $('#'+element_id).val();
+
         dataItems = parent_data.map((parentitem) => {
             var parent_element_data=parentitem;
             if (parentitem.parent_param_label == element_id)                 {
@@ -192,7 +216,15 @@ function change_column_color(column,condition,color)
                          var post_request = $.ajax({
                                                 type: 'POST',
                                                 url: '/child_dropdown',
-                                                data : data_dict
+                                                data : data_dict,
+                                                beforeSend: function(){
+                                               document.getElementById("ajaxspinner").innerHTML='<img src="{{ url_for('static',  filename='css/flask_report_system/gif/805.gif')}}" alt="this slowpoke moves" height="50" width="50"/>';
+
+                                               },
+                                               complete: function(){
+                                               document.getElementById("ajaxspinner").innerHTML='';
+                                               }
+
                                             });
                          post_request.done(function(data){
                             child_data=JSON.parse(data);
@@ -208,6 +240,7 @@ function change_column_color(column,condition,color)
                     });
                  }
         });
+
     }
     function checkFilter(){
          $('#alert_div').css("visibility","visible");
@@ -241,7 +274,13 @@ function change_column_color(column,condition,color)
              var post_request = $.ajax({
                 type: 'POST',
                 url: '/run_report',
-                data : data_dict
+                data : data_dict,
+                beforeSend: function(){
+               document.getElementById("ajaxspinnertable").innerHTML='<img class="center" src="{{ url_for('static',  filename='css/flask_report_system/gif/805.gif')}}" alt="this slowpoke moves" height="50" width="50"/>';
+                },
+                complete: function(){
+                document.getElementById("ajaxspinnertable").innerHTML='';
+               }
             });
             post_request.done(function(data){
                     console.log(data)
@@ -273,11 +312,8 @@ function change_column_color(column,condition,color)
                              body=body+'<td class ="'+column_name+'">' + tbody[i][column_name] +'</td>';
                       }
                       body=body+'</tr>'
-
                     }
-
                 body=body+'';
-
                 var cols = [];
                 var keys=data.keys;
                 keys.forEach(function(k) {
@@ -288,9 +324,7 @@ function change_column_color(column,condition,color)
                     });
                   });
                 console.log(body);
-
                 document.getElementById('datatable_body').innerHTML =body;
-
                 if ( ! $.fn.DataTable.isDataTable( '#dataTable' ) ) {
                       loadDataTable(cols);
                     }
@@ -309,7 +343,6 @@ function change_column_color(column,condition,color)
                        var color_column=color_item.field_name;
                        var color_code=color_item.color;
                        var color_apply_level=color_item.apply_level;
-
                         if (color_apply_level==2){
                             change_column_color(color_column,color_condition,color_code);
                             }else{
@@ -323,4 +356,5 @@ function change_column_color(column,condition,color)
          }
       }
 </script>
+
 {% endblock %}

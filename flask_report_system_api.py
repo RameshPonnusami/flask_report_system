@@ -6,6 +6,7 @@ from sqlalchemy.sql import expression, functions
 from sqlalchemy import types
 from datetime import datetime, date
 from decimal import *
+import time
 
 def default(o):
     if isinstance(o, (date, datetime)):
@@ -232,7 +233,7 @@ def flask_report_details(id):
                            parent_data=parent_params,color=color_data)
 
 
-
+import time
 @app.route('/run_report',methods=['GET','POST'])
 def run_report():
     if request.method=='POST':
@@ -261,6 +262,7 @@ def run_report():
             print(e)
             dataset={"keys":[],"data":[],"msg":" Error while processing! Contact your admin "+" Error is ==>"+str(e)}
         response=json.dumps(dataset,default=default)
+
         response = make_response(response)
         response.content_type = 'application/json'
         return make_response(response)

@@ -7,6 +7,7 @@ from flask_migrate import Migrate,MigrateCommand
 from flask_script import Manager
 
 app = Flask(__name__)
+
 app.config.from_object('config.DevConfig')
 #if 'SECRET_KEY' not in app.config:
 

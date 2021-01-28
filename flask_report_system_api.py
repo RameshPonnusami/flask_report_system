@@ -170,7 +170,7 @@ def flask_report_details(id):
                                     FlaskParameter.id,
                                     FlaskParameter.parent_id
                                     ).join(FlaskReportParameter,(FlaskReportParameter.parameter_id==FlaskParameter.id)).filter(
-                                    FlaskReportParameter.report_id == id) #getting report parameters
+                                    FlaskReportParameter.report_id == id).order_by(FlaskReportParameter.id) #getting report parameters
     listdict=[]
     paramereter_list=[] #store parameters name  as list alone
     paramereter_list_id=[]

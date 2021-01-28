@@ -20,7 +20,8 @@
 
 #dataTable tr:nth-child(even){background-color: #f2f2f2;}
 
-#dataTable tr:hover {background-color: #ddd;}
+#datatable_body tr:hover {background-color: #ddd;}
+
 
 #dataTable th {
   padding-top: 12px;
@@ -112,6 +113,7 @@ var r_id= {{ report_id | safe }};
 var plist_id= {{ plistid | safe }};
 var plist_names= {{ plist | safe }};
 var parent_data= {{ parent_data | safe }};
+console.log(parent_data);
 var color_data= {{ color | safe }};
 var report_name='{{ report_name }}';
 

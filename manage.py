@@ -1,5 +1,5 @@
 from app import app,manager
-from models import *
+from flask_report_system_models import *
 from flask_report_system_api import *
 try:
    db.create_all()

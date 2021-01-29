@@ -132,7 +132,8 @@ def flask_edit_report_details(id):
         db.session.commit()
         FlaskReportDataColor.query.filter_by(report_id=id).delete()
         db.session.commit()
-        if len(color_question) > 1:
+        cq= color_question if type(color_question)==int else len(color_question)
+        if cq > 0:
             for  i,cf in enumerate(color_field_name):
                 color_obj = FlaskReportDataColor( report_id=id,field_name=color_field_name[i],condition=color_condition[i],color=color[i],apply_level=color_apply_level[i])
                 db.session.add(color_obj)
@@ -237,7 +238,7 @@ import time
 @app.route('/run_report',methods=['GET','POST'])
 def run_report():
     if request.method=='POST':
-
+        time.sleep(5)
         report_id=request.form.get('report_id')
         plistid=request.form.getlist('plistid[]')
         plist_names=request.form.getlist('plist_names[]')
@@ -271,6 +272,7 @@ def run_report():
 @app.route('/child_dropdown',methods=['GET','POST'])
 def child_dropdown():
     if request.method == 'POST':
+
         parent_value=request.form.get('parent_value')
         parent_label=request.form.get('parent_label')
         child_param_id=request.form.get('child_param_id')

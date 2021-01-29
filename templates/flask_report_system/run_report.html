@@ -2,6 +2,8 @@
 {% block title %}List Of Reports{% endblock %}
 {% block content %}
 <style>
+
+
 .center {
   display: block;
   margin-left: auto;
@@ -32,7 +34,7 @@
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
-  background-color: #4CAF50;
+  background-color: #4f5bed00;
   color: white;
 }
 
@@ -116,14 +118,17 @@
             <div class="panel panel-default">
 
                 <div id="table_container" class="panel-body" style="background:#f1f1f1">
-                     <div id="ajaxspinnertable" >
-                    </div>
+
                     <table id="dataTable" class="cell-border" style="width:100%">
                         <thead id="datatable_thead" class="cell-border" style="width:100%;background-color: #27507F;color: white;">
                         </thead>
                         <tbody id="datatable_body">
                         </tbody>
                     </table>
+<!--                      <div id="ajaxspinnertable" >-->
+<!--                    </div>-->
+                    <div class="loader" id="loader"></div>
+
                 </div>
             </div>
         </div>
@@ -242,10 +247,10 @@ function change_column_color(column,condition,color)
         });
 
     }
-    function checkFilter(){
+    function checkFilter(msg){
          $('#alert_div').css("visibility","visible");
          $('#alert_msg').css("color","#ff4a00");
-         $('#alert_msg').text("Please select value");
+         $('#alert_msg').text(msg);
         }
 
     function runReport(){
@@ -259,16 +264,17 @@ function change_column_color(column,condition,color)
         data_dict['plist_names']=plist_names;
         var i;
         var is_empty=0;
+        //Checking wheather dropdown option are properly selected or not
         for (i = 0; i < plist.length; i++) {
             pname=plist[i];
             var val = $('#'+pname).val();
             data_dict[pname]= val;
             if (val==''){
                 is_empty=-1;
-                checkFilter()
+                checkFilter("Please select value")
                 }
             }
-         document.getElementById("datatable_thead").innerHTML="";
+
          document.getElementById("datatable_body").innerHTML="";
          if (is_empty==0){
              var post_request = $.ajax({
@@ -276,16 +282,25 @@ function change_column_color(column,condition,color)
                 url: '/run_report',
                 data : data_dict,
                 beforeSend: function(){
-               document.getElementById("ajaxspinnertable").innerHTML='<img class="center" src="{{ url_for('static',  filename='css/flask_report_system/gif/805.gif')}}" alt="this slowpoke moves" height="50" width="50"/>';
+                $("#loader").removeAttr("style");
+                //enable the loader before load
+                $(".loader").css({"position": "fixed",
+                    "left": "0px",
+                    "top": "50px",
+                    "width": "100%",
+                    "height": "100%",
+                    "z-index": "9999",
+                    "background": "url('{{ url_for('static',  filename='css/flask_report_system/gif/805.gif')}}') 50% 50% no-repeat rgb(249,249,249)",
+                    "opacity": ".8",
+                    "fadeOut":"false"});
                 },
                 complete: function(){
-                document.getElementById("ajaxspinnertable").innerHTML='';
+                //disable the loader after loaded
+                 $(".loader").fadeOut("slow");
+                 $("#loader").removeAttr("style");
                }
             });
             post_request.done(function(data){
-                    console.log(data)
-                    //data=JSON.parse(data);
-
                     var thead=data.keys;
                     if (thead.length==0){
                         var error_msg=data.msg;
@@ -294,27 +309,18 @@ function change_column_color(column,condition,color)
                         $('#alert_msg').text(error_msg);
                         }
                     var tbody=data.data;
-                    var head='';
-                    for (var i = 0; i < thead.length; i++) {
-                      head=head+'<td>' + thead[i] +'</td>';
-                    }
-                   head=head+'';
-                   document.getElementById('datatable_thead').innerHTML =head;
-                   //body
-
                     var body='';
                     for (var i = 0; i < tbody.length; i++) {
                         body=body+'<tr class="item">'
-                        console.log(body);
                         for (var j = 0; j < thead.length; j++) {
                             var column_name=thead[j];
-                            console.log(column_name);
                              body=body+'<td class ="'+column_name+'">' + tbody[i][column_name] +'</td>';
                       }
                       body=body+'</tr>'
                     }
                 body=body+'';
                 var cols = [];
+                //generating keys and titles  for datatable
                 var keys=data.keys;
                 keys.forEach(function(k) {
                     cols.push({
@@ -323,15 +329,12 @@ function change_column_color(column,condition,color)
                         //optionally do some type detection here for render function
                     });
                   });
-                console.log(body);
                 document.getElementById('datatable_body').innerHTML =body;
                 if ( ! $.fn.DataTable.isDataTable( '#dataTable' ) ) {
                       loadDataTable(cols);
                     }
                  else{
-                 console.log(thead.length);
                  col_length=thead.length;
-                 //col_length='"'+col_length+'"';
                   if (tbody.length==0)
                     {
                       body='<tr> <td colspan='+'"'+col_length+'"'+'style="text-align:center;" >No data available in table</td></tr>'
@@ -350,6 +353,11 @@ function change_column_color(column,condition,color)
                             }
                        });
             });
+            post_request.fail(function(xhr, status, error) {
+        // error handling
+         console.log("server error");
+         checkFilter("Coudn't process this report! Please contact your administrator")
+    });
           }
          else{
          console.log("please fill values");

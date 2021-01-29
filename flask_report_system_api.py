@@ -69,14 +69,14 @@ def create_flask_report():
         #db.session.commit()
         db.session.flush()
         report_id=report.id
-
+        print(report_id)
         if len(color_question)>1:
             for i, cf in enumerate(color_field_name):
                 color_obj = FlaskReportDataColor(report_id=report_id, field_name=color_field_name[i], condition=color_condition[i],
                                                  color=color[i], apply_level=color_apply_level[i])
                 db.session.add(color_obj)
             db.session.commit()
-
+        db.session.commit()
         return redirect(url_for('edit_report_list'))
     ''' Concat not working in sqlite database '''
     # params=db.session.query(FlaskParameter.id,FlaskParameter.parameter_label,

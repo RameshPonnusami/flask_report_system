@@ -7,7 +7,7 @@ import json
 #from flask_simple_serializer.serializers import Serializer
 from datetime import date ,datetime
 
-class FlaskReport(db.Model):
+class FlaskReport(db.Model):#USER
     __tablename__='flask_report'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name=db.Column(db.String(100),nullable=False)
@@ -20,7 +20,7 @@ class FlaskReport(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), index=True, server_default=func.now())
     params = db.relationship('FlaskReportParameter')
 
-class FlaskParameter(db.Model):
+class FlaskParameter(db.Model): #ROLES
     __tablename__='flask_parameter'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     parameter_name = db.Column(db.String(100),nullable=False)
@@ -35,7 +35,7 @@ class FlaskParameter(db.Model):
 
 
 
-class FlaskReportParameter(db.Model):
+class FlaskReportParameter(db.Model):#USER ROLE
     __tablename__='flask_report_parameter'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     report_id = db.Column(db.Integer(), db.ForeignKey('flask_report.id'))

@@ -251,6 +251,7 @@ function change_column_color(column,condition,color)
          $('#alert_div').css("visibility","visible");
          $('#alert_msg').css("color","#ff4a00");
          $('#alert_msg').text(msg);
+         $("#loader").removeAttr("style");
         }
 
     function runReport(){
@@ -295,9 +296,9 @@ function change_column_color(column,condition,color)
                     "fadeOut":"false"});
                 },
                 complete: function(){
-                //disable the loader after loaded
                  $(".loader").fadeOut("slow");
                  $("#loader").removeAttr("style");
+                  console.log('post request complete');
                }
             });
             post_request.done(function(data){
@@ -307,6 +308,7 @@ function change_column_color(column,condition,color)
                         $('#alert_div').css("visibility","visible");
                         $('#alert_msg').css("color","#ff4a00");
                         $('#alert_msg').text(error_msg);
+                        $("#loader").removeAttr("style");
                         }
                     var tbody=data.data;
                     var body='';
@@ -354,10 +356,12 @@ function change_column_color(column,condition,color)
                        });
             });
             post_request.fail(function(xhr, status, error) {
-        // error handling
-         console.log("server error");
-         checkFilter("Coudn't process this report! Please contact your administrator")
-    });
+                 console.log("server error");
+                 checkFilter("Coudn't process this report! Please contact your administrator");
+                 $(".loader").fadeOut("slow");
+                 $("#loader").removeAttr("style");
+                  console.log('error from server');
+               });
           }
          else{
          console.log("please fill values");

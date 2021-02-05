@@ -1,7 +1,7 @@
 # flask_report_system
 provides system to design report by writing on SQL on app itself
 
-[Complete blog about this report system ](https://ramramesh1374.medium.com/report-system-in-flask-4bf895091e5e "Flask Report System")
+Know more about this app-->[Complete blog about this report system ](https://ramramesh1374.medium.com/report-system-in-flask-4bf895091e5e "Flask Report System")
 
 1.Install requiremnets from requiremnets.txt
 
